@@ -5,11 +5,11 @@ from .import views
 
 urlpatterns = [
     # path('', views.index,name="urls_index"),
-    # #1
-    # path('clientes/listar_clientes', views.listar_clientes,name="listar_clientes"),
+    #1
+    path('clientes/listar_clientes', views.api_listar_clientes,name="api_listar_clientes"),
     
     #2
-    path('citas/listar_citas', views.citas_lista_api,name="listar_citas"),
+    path('citas/listar_citas', views.api_listar_citas,name="api_listar_citas"),
     
 #     #3
 #     path('estaciones/listar_estaciones', views.listar_estaciones,name="listar_estaciones"),

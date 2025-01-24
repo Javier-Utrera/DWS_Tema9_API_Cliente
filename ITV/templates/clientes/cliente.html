@@ -24,7 +24,7 @@
             Mostrar/Ocultar Citas
         </button>
             <div class="p-3 rounded collapse" id="contenidoCollapse_{{ cliente.id }}">
-                {% for cita in cliente.cliente_Cita.all %}
+                {% for cita in cliente.cliente_cita %}
                     <div class="mb-3">
                         <p class="card-text"><strong>Id Cita:</strong> {{ cita.id }}</p>
                         <p class="card-text"><strong>Matrícula:</strong> {{ cita.matricula }}</p>
@@ -43,7 +43,7 @@
             </div>
             <br>
         {% load bootstrap_icons %}
-        <div class="row btn-group">
+        {% comment %} <div class="row btn-group">
             <div class="mb-2">
                 <button type="button" 
                         class="btn btn-outline-primary"> 
@@ -58,6 +58,6 @@
                     </button> 
                 </form>
             </div>
-        </div>
+        </div> {% endcomment %}
     </div>
 </div>
