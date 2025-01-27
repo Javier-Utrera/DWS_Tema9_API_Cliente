@@ -12,7 +12,7 @@
         <p class="card-text"><strong>Masa Máxima Autorizada:</strong> {{ vehiculo.mma }}</p>
         <p class="card-text"><strong>Asientos:</strong> {{ vehiculo.asientos }}</p>
         <p class="card-text"><strong>Ejes:</strong> {{ vehiculo.ejes }}</p>
-        <p class="card-text"><strong>Ejes pares:</strong> {{ vehiculo.ejes|divisibleby:"2" }}</p>
+        
         <p class="card-text"><strong>DNI Propietario:</strong> {{ vehiculo.dni_propietario }}</p>
         <p class="card-text"><strong>Matrícula:</strong> {{ vehiculo.matricula }}</p>
 
@@ -21,7 +21,7 @@
         <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_trabajador_{{vehiculo.id}}" aria-expanded="false" aria-controls="collapse_trabajador_{{vehiculo.id}}">
             Mostrar/Ocultar Datos
         </button>
-        {% for trabajador in vehiculo.trabajadores.all %}
+        {% for trabajador in vehiculo.trabajadores %}
         <div class="mb-3 p-2 rounded collapse" id="collapse_trabajador_{{vehiculo.id}}">
             <p class="card-text"><strong>Nombre:</strong> {{ trabajador.nombre|lower }}</p>
             <p class="card-text"><strong>Apellidos:</strong> {{ trabajador.apellidos|upper }}</p>
@@ -38,7 +38,7 @@
         <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_inspeccion_{{vehiculo.id}}" aria-expanded="false" aria-controls="collapse_inspeccion_{{vehiculo.id}}">
             Mostrar/Ocultar Datos
         </button>
-        {% for inspeccion in vehiculo.vehiculo_Inspeccion.all %}
+        {% for inspeccion in vehiculo.vehiculo_Inspeccion %}
         <div class="mb-3 p-2 rounded collapse" id="collapse_inspeccion_{{vehiculo.id}}">
             <p class="card-text"><strong>Id Inspección:</strong> {{ inspeccion.id }}</p>
             <p class="card-text"><strong>Fecha:</strong> {{ inspeccion.fecha_inspeccion|date:"Y-m-d" }}</p>
@@ -51,7 +51,7 @@
     {% endfor %}
     <br>
     {% load bootstrap_icons %}
-        <div class="row btn-group">
+        {% comment %} <div class="row btn-group">
             <div class="mb-2">
                 <button type="button" 
                         class="btn btn-outline-primary"> 
@@ -66,6 +66,6 @@
                     <span>{% bs_icon 'trash' %}</span>
                 </button> 
             </form>
-        </div>
+        </div> {% endcomment %}
     </div>
 </div>

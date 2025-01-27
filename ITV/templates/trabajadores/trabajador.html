@@ -12,7 +12,7 @@
         <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_estacion_{{ trabajador.id }}" aria-expanded="false" aria-controls="collapse_estacion_{{ trabajador.id }}">
             Mostrar/Ocultar Datos
         </button>
-        {% for estacion in trabajador.estacion.all %}
+        {% for estacion in trabajador.estacion %}
         <div class="mb-3 p-2 rounded collapse" id="collapse_estacion_{{ trabajador.id }}">
             <p class="card-text"><strong>Id Estación:</strong> {{ estacion.id }}</p>
             <p class="card-text"><strong>Nombre:</strong> {{ estacion.nombre }}</p>
@@ -28,7 +28,7 @@
         <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_inspeccion_{{ trabajador.id }}" aria-expanded="false" aria-controls="collapse_inspeccion_{{ trabajador.id }}">
             Mostrar/Ocultar Datos
         </button>
-        {% for inspeccion in trabajador.trabajador_Inspeccion.all %}
+        {% for inspeccion in trabajador.trabajador_Inspeccion %}
         <div class="mb-3 p-2 rounded collapse" id="collapse_inspeccion_{{ trabajador.id }}" >
             <p class="card-text"><strong>Id Inspección:</strong> {{ inspeccion.id }}</p>
             <p class="card-text"><strong>Fecha:</strong> {{ inspeccion.fecha_inspeccion|date:"Y-m-d" }}</p>
@@ -44,7 +44,7 @@
         <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_vehiculo_{{ trabajador.id }}" aria-expanded="false" aria-controls="collapse_vehiculo_{{ trabajador.id }}">
             Mostrar/Ocultar Datos
         </button>
-        {% for vehiculo in trabajador.trabajador_Vehiculo.all %}
+        {% for vehiculo in trabajador.trabajador_Vehiculo %}
         <div class="mb-3 p-2 rounded collapse" id="collapse_vehiculo_{{ trabajador.id }}">
             <p class="card-text"><strong>Id Vehículo:</strong> {{ vehiculo.id }}</p>
             <p class="card-text"><strong>Marca:</strong> {{ vehiculo.marca }}</p>
@@ -63,7 +63,7 @@
         {% empty %}
         <h1>Lo siento, no existen vehiculos</h1>
     {% endfor %}
-        {% load bootstrap_icons %}
+        {% comment %} {% load bootstrap_icons %}
         <br>
         <div class="row btn-group">
             <div class="mb-2">
@@ -80,6 +80,6 @@
                     <span>{% bs_icon 'trash' %}</span>
                 </button> 
             </form>
-        </div> 
+        </div>  {% endcomment %}
     </div>
 </div>
