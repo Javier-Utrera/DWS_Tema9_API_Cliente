@@ -36,7 +36,7 @@ def api_listar_vehiculos(request):
     else:
         headers = {'Authorization': 'Bearer '+env('Cliente')}        
     
-    response = requests.get("http://127.0.0.1:8000/api/v1/citas/listar_citas",headers=headers)
+    response = requests.get("https://frroga.pythonanywhere.com/api/v1/citas/listar_citas",headers=headers)
     vehiculos= response.json()
     return render(request,"vehiculos/listar_vehiculos.html",{'views_vehiculos':vehiculos})
 
@@ -52,7 +52,7 @@ def api_listar_citas(request):
     else:
         headers = {'Authorization': 'Bearer '+env('Cliente')}       
     
-    response = requests.get("http://127.0.0.1:8000/api/v1/citas/listar_citas",headers=headers)
+    response = requests.get("https://frroga.pythonanywhere.com/api/v1/citas/listar_citas",headers=headers)
     citas= response.json()
     return render(request,"citas/listar_citas.html",{'views_citas':citas})
 
@@ -66,7 +66,7 @@ def api_listar_clientes(request):
             headers = {'Authorization': 'Bearer '+env('Trabajador')}
     else:
         headers = {'Authorization': 'Bearer '+env('Admin')}     
-    response = requests.get("http://127.0.0.1:8000/api/v1/clientes/listar_clientes",headers=headers)
+    response = requests.get("https://frroga.pythonanywhere.com/api/v1/clientes/listar_clientes",headers=headers)
     clientes= response.json()
     return render(request,"clientes/listar_clientes.html",{'views_listar_cliente':clientes})
 
@@ -80,7 +80,7 @@ def api_listar_trabajadores(request):
             headers = {'Authorization': 'Bearer '+env('Trabajador')}
     else:
         headers = {'Authorization': 'Bearer '+env('Admin')}     
-    response = requests.get("http://127.0.0.1:8000/api/v1/trabajadores/listar_trabajadores",headers=headers)
+    response = requests.get("https://frroga.pythonanywhere.com/api/v1/trabajadores/listar_trabajadores",headers=headers)
     trabajadores= response.json()
     return render(request,"trabajadores/listar_trabajadores.html",{'views_trabajadores_estacion':trabajadores})
 
@@ -94,6 +94,6 @@ def api_listar_inspecciones(request):
             headers = {'Authorization': 'Bearer '+env('Trabajador')}
     else:
         headers = {'Authorization': 'Bearer '+env('Admin')}        
-    response = requests.get("http://127.0.0.1:8000/api/v1/inspecciones/listar_inspecciones",headers=headers)
+    response = requests.get("https://frroga.pythonanywhere.com/api/v1/inspecciones/listar_inspecciones",headers=headers)
     inspecciones= response.json()
     return render(request,"inspecciones/listar_inspecciones.html",{'views_inspecciones_vehiculo':inspecciones})
