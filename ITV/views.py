@@ -9,6 +9,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'),True)
 env = environ.Env()
+
+
 def index(request): 
     return render(request, 'index.html')
 def mi_error_400(request,exception=None):
