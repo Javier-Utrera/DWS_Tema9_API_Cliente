@@ -15,5 +15,8 @@ urlpatterns = [
     path('trabajadores/listar_trabajadores', views.api_listar_trabajadores,name="api_listar_trabajadores"),
     
     #4
-    path('vehiculos/listar_vehiculos', views.api_listar_vehiculos,name="api_listar_vehiculos"),   
+    path('vehiculos/listar_vehiculos', views.api_listar_vehiculos,name="api_listar_vehiculos"),
+    
+    #5
+    path('inspecciones/listar_inspecciones', views.api_listar_inspecciones,name="api_listar_inspecciones"), 
 ]

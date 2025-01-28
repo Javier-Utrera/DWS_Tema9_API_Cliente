@@ -45,7 +45,7 @@
             <p class="card-text"><strong>Observaciones:</strong> {{ inspeccion.inspeccion_Factura.observaciones }}</p>
         </div>
         {% load bootstrap_icons %}
-        <br>
+        {% comment %} <br>
         <div class="row btn-group">
             <div class="mb-2">
                 <button type="button" 
@@ -61,6 +61,6 @@
                     </button> 
                 </form>
             </div>
-        </div>
+        </div> {% endcomment %}
     </div>
 </div>

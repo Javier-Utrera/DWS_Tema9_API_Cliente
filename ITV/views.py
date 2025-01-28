@@ -23,8 +23,7 @@ def mi_error_404(request,exception=None):
 def mi_error_500(request,exception=None):
     return render(request,"errores/500.html",None,None,500)
 
-def api_listar_vehiculos(request):
-    
+def api_listar_vehiculos(request):   
     if (request.user.is_anonymous==False):     
         if (request.user and request.user.rol == 1):       
             headers = {'Authorization': 'Bearer '+env('Admin')} 
@@ -33,7 +32,7 @@ def api_listar_vehiculos(request):
         else:
             headers = {'Authorization': 'Bearer '+env('Trabajador')}
     else:
-        headers = {"Authorization":"Bearer 7YfFXTXnKfIVBKBTghydsB6kdNCT9W"}       
+        headers = {'Authorization': 'Bearer '+env('Cliente')}        
     
     response = requests.get("http://127.0.0.1:8000/api/v1/citas/listar_citas",headers=headers)
     vehiculos= response.json()
@@ -49,7 +48,7 @@ def api_listar_citas(request):
         else:
             headers = {'Authorization': 'Bearer '+env('Trabajador')}
     else:
-        headers = {"Authorization":"Bearer 7YfFXTXnKfIVBKBTghydsB6kdNCT9W"}       
+        headers = {'Authorization': 'Bearer '+env('Cliente')}       
     
     response = requests.get("http://127.0.0.1:8000/api/v1/citas/listar_citas",headers=headers)
     citas= response.json()
@@ -64,7 +63,7 @@ def api_listar_clientes(request):
         else:
             headers = {'Authorization': 'Bearer '+env('Trabajador')}
     else:
-        headers = {"Authorization":"Bearer 7YfFXTXnKfIVBKBTghydsB6kdNCT9W"}     
+        headers = {'Authorization': 'Bearer '+env('Admin')}     
     response = requests.get("http://127.0.0.1:8000/api/v1/clientes/listar_clientes",headers=headers)
     clientes= response.json()
     return render(request,"clientes/listar_clientes.html",{'views_listar_cliente':clientes})
@@ -78,7 +77,21 @@ def api_listar_trabajadores(request):
         else:
             headers = {'Authorization': 'Bearer '+env('Trabajador')}
     else:
-        headers = {"Authorization":"Bearer 7YfFXTXnKfIVBKBTghydsB6kdNCT9W"}     
+        headers = {'Authorization': 'Bearer '+env('Admin')}     
     response = requests.get("http://127.0.0.1:8000/api/v1/trabajadores/listar_trabajadores",headers=headers)
     trabajadores= response.json()
     return render(request,"trabajadores/listar_trabajadores.html",{'views_trabajadores_estacion':trabajadores})
+
+def api_listar_inspecciones(request):
+    if (request.user.is_anonymous==False):     
+        if (request.user and request.user.rol == 1):       
+            headers = {'Authorization': 'Bearer '+env('Admin')} 
+        elif (request.user and request.user.rol == 2):
+            headers = {'Authorization': 'Bearer '+env('Cliente')} 
+        else:
+            headers = {'Authorization': 'Bearer '+env('Trabajador')}
+    else:
+        headers = {'Authorization': 'Bearer '+env('Admin')}        
+    response = requests.get("http://127.0.0.1:8000/api/v1/inspecciones/listar_inspecciones",headers=headers)
+    inspecciones= response.json()
+    return render(request,"inspecciones/listar_inspecciones.html",{'views_inspecciones_vehiculo':inspecciones})
