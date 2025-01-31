@@ -1,0 +1,5 @@
+curl -X POST "http://frroga.pythonanywhere.com/oauth2/token/" -d "grant_type=password&username=javier&password=javier&client_id=mi_aplicacion&client_secret=mi_clave_secreta"
+
+curl -X POST "http://frroga.pythonanywhere.com/oauth2/token/" -d "grant_type=password&username=cliente1&password=contraseña1&client_id=mi_aplicacion&client_secret=mi_clave_secreta"
+
+curl -X POST "http://frroga.pythonanywhere.com/oauth2/token/" -d "grant_type=password&username=trabajador1&password=contraseña1&client_id=mi_aplicacion&client_secret=mi_clave_secreta"
