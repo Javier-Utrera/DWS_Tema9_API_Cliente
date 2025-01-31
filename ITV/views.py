@@ -1,6 +1,7 @@
 import requests
 from django.core import serializers
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from .forms import *
 
 import environ
 import os
@@ -10,6 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'),True)
 env = environ.Env()
 
+def crear_cabecera():
+    return {'Authorization': 'Bearer '+env('Admin')}
 
 def index(request): 
     return render(request, 'index.html')
@@ -97,3 +100,44 @@ def api_listar_inspecciones(request):
     response = requests.get("https://frroga.pythonanywhere.com/api/v1/inspecciones/listar_inspecciones",headers=headers)
     inspecciones= response.json()
     return render(request,"inspecciones/listar_inspecciones.html",{'views_inspecciones_vehiculo':inspecciones})
+
+def api_buscar_cita(request):
+    if len(request.GET) > 0:
+        formulario = BusquedaAvanzadaCita(request.GET)
+        if formulario.is_valid():
+            mensaje = "Se ha buscado con los siguientes criterios:\n"
+            
+            matriculav = formulario.cleaned_data.get("matricula")
+            tipo_inspeccionv = formulario.cleaned_data.get("tipo_inspeccion")
+            fecha_propuestav = formulario.cleaned_data.get("fecha_propuesta")
+            
+            
+            if matriculav != "":
+                citas = citas.filter(matricula__icontains=matriculav)
+                mensaje += "Matrícula buscada: {matriculav}\n"
+            if tipo_inspeccionv != "":
+                citas = citas.filter(tipo_inspeccion=tipo_inspeccionv)
+                mensaje += "Tipo de inspección buscado: {tipo_inspeccionv}\n"
+            if fecha_propuestav is not None:
+                citas = citas.filter(fecha_propuesta=fecha_propuestav)
+                mensaje += "Fecha propuesta buscada: {fecha_propuestav.strftime('%d-%m-%Y')}\n"
+            
+            headers = crear_cabecera()
+            response = requests.get(
+                "https://frroga.pythonanywhere.com/api/v1/citas/api_buscar_cita",
+                headers=headers,
+                params=formulario.cleaned_data                           
+            )
+            citas=response.json()          
+            return render(request, "citas/listar_citas.html", {
+                "views_citas": citas,
+                "texto_busqueda": mensaje,
+            })
+        if("HTTP_REFERER" in request.Meta):
+            return redirect(request.META["HTTP_REFERER"])
+        else:
+            return redirect("index")
+    else:
+        formulario = BusquedaAvanzadaCita(None)
+    
+    return render(request, 'citas/busqueda_avanzada.html', {"formulario": formulario})

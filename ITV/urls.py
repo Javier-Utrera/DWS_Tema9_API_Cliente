@@ -19,4 +19,7 @@ urlpatterns = [
     
     #5
     path('inspecciones/listar_inspecciones', views.api_listar_inspecciones,name="api_listar_inspecciones"), 
+    
+    #Buscar cita  
+    path('citas/buscar',views.api_buscar_cita,name="api_buscar_cita"),
 ]
