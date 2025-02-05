@@ -1,3 +1,4 @@
+from urllib.error import HTTPError
 import requests
 from django.core import serializers
 from django.shortcuts import redirect, render
@@ -102,42 +103,141 @@ def api_listar_inspecciones(request):
     return render(request,"inspecciones/listar_inspecciones.html",{'views_inspecciones_vehiculo':inspecciones})
 
 def api_buscar_cita(request):
-    if len(request.GET) > 0:
-        formulario = BusquedaAvanzadaCita(request.GET)
-        if formulario.is_valid():
-            mensaje = "Se ha buscado con los siguientes criterios:\n"
-            
-            matriculav = formulario.cleaned_data.get("matricula")
-            tipo_inspeccionv = formulario.cleaned_data.get("tipo_inspeccion")
-            fecha_propuestav = formulario.cleaned_data.get("fecha_propuesta")
-            
-            
-            if matriculav != "":
-                citas = citas.filter(matricula__icontains=matriculav)
-                mensaje += "Matrícula buscada: {matriculav}\n"
-            if tipo_inspeccionv != "":
-                citas = citas.filter(tipo_inspeccion=tipo_inspeccionv)
-                mensaje += "Tipo de inspección buscado: {tipo_inspeccionv}\n"
-            if fecha_propuestav is not None:
-                citas = citas.filter(fecha_propuesta=fecha_propuestav)
-                mensaje += "Fecha propuesta buscada: {fecha_propuestav.strftime('%d-%m-%Y')}\n"
-            
+    if(len(request.GET) > 0):
+        formulario = BusquedaAvanzadaCita(request.GET)       
+        try:
             headers = crear_cabecera()
             response = requests.get(
-                "https://frroga.pythonanywhere.com/api/v1/citas/api_buscar_cita",
+                "http://127.0.0.1:8000/api/v1/citas/buscar",
                 headers=headers,
-                params=formulario.cleaned_data                           
-            )
-            citas=response.json()          
-            return render(request, "citas/listar_citas.html", {
-                "views_citas": citas,
-                "texto_busqueda": mensaje,
-            })
-        if("HTTP_REFERER" in request.Meta):
-            return redirect(request.META["HTTP_REFERER"])
-        else:
-            return redirect("index")
+                params=formulario.data
+            )             
+            if(response.status_code == requests.codes.ok):
+                citas = response.json()
+                return render(request, "citas/listar_citas.html",
+                              {"views_citas":citas})
+            else:
+                print(response.status_code)
+                response.raise_for_status()
+        except HTTPError as http_err:
+            print(f'Hubo un error en la petición: {http_err}')
+            if(response.status_code == 400):
+                errores = response.json()
+                for error in errores:
+                    formulario.add_error(error,errores[error])
+                return render(request, 
+                            'citas/busqueda_avanzada.html',
+                            {"formulario":formulario,"errores":errores})
+            else:
+                return mi_error_500(request)
+        except Exception as err:
+            print(f'Ocurrió un error: {err}')
+            return mi_error_500(request)
     else:
         formulario = BusquedaAvanzadaCita(None)
-    
-    return render(request, 'citas/busqueda_avanzada.html', {"formulario": formulario})
+    return render(request, 'citas/busqueda_avanzada.html',{"formulario":formulario})
+
+def api_buscar_inspeccion(request):
+    if(len(request.GET) > 0):
+        formulario = BusquedaAvanzadaInspeccion(request.GET)       
+        try:
+            headers = crear_cabecera()
+            response = requests.get(
+                "http://127.0.0.1:8000/api/v1/inspecciones/buscar",
+                headers=headers,
+                params=formulario.data
+            )             
+            if(response.status_code == requests.codes.ok):
+                inspecciones = response.json()
+                return render(request,"inspecciones/listar_inspecciones.html",{
+                    "views_inspecciones_vehiculo":inspecciones})
+            else:
+                print(response.status_code)
+                response.raise_for_status()
+        except HTTPError as http_err:
+            print(f'Hubo un error en la petición: {http_err}')
+            if(response.status_code == 400):
+                errores = response.json()
+                for error in errores:
+                    formulario.add_error(error,errores[error])
+                return render(request, 
+                            'inspecciones/busqueda_avanzada.html',
+                            {"formulario":formulario,"errores":errores})
+            else:
+                return mi_error_500(request)
+        except Exception as err:
+            print(f'Ocurrió un error: {err}')
+            return mi_error_500(request)
+    else:
+        formulario = BusquedaAvanzadaInspeccion(None)
+    return render(request, 'inspecciones/busqueda_avanzada.html',{"formulario":formulario})
+
+def api_buscar_vehiculo(request):
+    if(len(request.GET) > 0):
+        formulario = BusquedaAvanzadaVehiculo(request.GET)       
+        try:
+            headers = crear_cabecera()
+            response = requests.get(
+                "http://127.0.0.1:8000/api/v1/vehiculos/buscar",
+                headers=headers,
+                params=formulario.data
+            )             
+            if(response.status_code == requests.codes.ok):
+                vehiculos = response.json()
+                return render(request,"vehiculos/listar_vehiculos.html",{
+                    "views_vehiculos":vehiculos})
+            else:
+                print(response.status_code)
+                response.raise_for_status()
+        except HTTPError as http_err:
+            print(f'Hubo un error en la petición: {http_err}')
+            if(response.status_code == 400):
+                errores = response.json()
+                for error in errores:
+                    formulario.add_error(error,errores[error])
+                return render(request, 
+                            'vehiculos/busqueda_avanzada.html',
+                            {"formulario":formulario,"errores":errores})
+            else:
+                return mi_error_500(request)
+        except Exception as err:
+            print(f'Ocurrió un error: {err}')
+            return mi_error_500(request)
+    else:
+        formulario = BusquedaAvanzadaVehiculo(None)
+    return render(request, 'vehiculos/busqueda_avanzada.html',{"formulario":formulario})
+
+def api_buscar_trabajador(request):
+    if(len(request.GET) > 0):
+        formulario = BusquedaAvanzadaTrabajador(request.GET)       
+        try:
+            headers = crear_cabecera()
+            response = requests.get(
+                "http://127.0.0.1:8000/api/v1/trabajadores/buscar",
+                headers=headers,
+                params=formulario.data
+            )             
+            if(response.status_code == requests.codes.ok):
+                trabajadores = response.json()
+                return render(request,"trabajadores/listar_trabajadores.html",{
+                    "views_trabajadores_estacion":trabajadores})
+            else:
+                print(response.status_code)
+                response.raise_for_status()
+        except HTTPError as http_err:
+            print(f'Hubo un error en la petición: {http_err}')
+            if(response.status_code == 400):
+                errores = response.json()
+                for error in errores:
+                    formulario.add_error(error,errores[error])
+                return render(request, 
+                            'trabajadores/busqueda_avanzada.html',
+                            {"formulario":formulario,"errores":errores})
+            else:
+                return mi_error_500(request)
+        except Exception as err:
+            print(f'Ocurrió un error: {err}')
+            return mi_error_500(request)
+    else:
+        formulario = BusquedaAvanzadaTrabajador(None)
+    return render(request, 'trabajadores/busqueda_avanzada.html',{"formulario":formulario})

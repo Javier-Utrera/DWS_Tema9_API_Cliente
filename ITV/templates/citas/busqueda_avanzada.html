@@ -6,7 +6,7 @@
 
 {% block contenido %}
     {% load django_bootstrap5 %} 
-    <form action = "{% url 'buscar_cita'%}" method = "GET">
+    <form action = "{% url 'api_buscar_cita'%}" method = "GET">
       
         {% csrf_token %}
         
