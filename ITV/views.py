@@ -1,4 +1,4 @@
-from urllib.error import HTTPError
+from requests.exceptions import HTTPError
 import requests
 from django.core import serializers
 from django.shortcuts import redirect, render
