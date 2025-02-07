@@ -374,3 +374,133 @@ En el template de login.html he creado con boostrap un pequeño div para que al 
         </div>
     </div>
 </div>
+
+# Respuestas a las prreguntas del boletin API REST II:GET
+
+## Por cada petición que hemos hecho, se ha incluido siempre lo siguiente:http://127.0.0.1:8000/ api/v1/libros/, que pasaría si en un futuro, la versión cambia.¿Deberíamos cambiarlo en todos los sitios de la aplicación?¿Cómo podríamos mejorarlo?
+
+Como hicimos anteriormente con el Bearer creamos 3 variables en el .env, este arhivo lo enrutamos en nuestro viewsp.py, para luego poder acceder a sus variables usando env('nombreDeLaVariable'), de esta forma al crear nuestro response en cada una de nuestras vistas modificaremos el parametro donde le indicamos la direccion del seviro seguido de la url que hemos creado en nuestro servidor.
+
+version=api/v1
+
+response = requests.get(
+    "http://127.0.0.1:8000/"+env('version')+"/citas/buscar",
+    headers=headers,
+    params=formulario.data
+)  
+
+Cambiando el valor de la variable 'version' en el .env cambiariamos en todo nuetro codigo a que version de la api tiene que hacer la peticion
+
+## Para la respuesta siempre incluimos la misma línea:response.json(). ¿Qué pasaría si en el día de mañana cambia el formato en una nueva versión, y en vez de json es xml?¿Debemos volver a cambiar en todos los sitios esa línea?
+
+Como vimos en clase la ventaja de tener versiones en nuestra api, es que si bien, nuestros clientes pueden usar la nueva version, la version antigua tiene que seguir dando soporte
+
+Voy a poner como ejemplo que varsion antigua manda responde con datos.json, pero la nueva version emite los datos en .xml
+
+  1-En mi .env voy a crear una variable donde almaceno las 2 versiones que podria tener mi servidor y la extension que va asociada a las versiones
+
+    formatos = {
+      "v1": "json",
+      "v2": "xml"
+    }
+
+  2-Modifico mi metodo crear_cabecera()
+
+# Segun la version de la api que tengo puesta en el .env busca en el diccionario FORMATOS_POR_VERSION que formato es el que voy a esperar del servidor, voy a mantenerme en la version1, si mi cliente tuviera que manejar respuestas de varias versiones tendria que crear mas variables para sus versiones correspondientes y manejarlas en FORMATO_RESPUESTA
+
+FORMATO_RESPUESTA = env('FORMATOS_POR_VERSION').get(env('VERSION_API'), "json")
+
+def crear_cabecera():
+    formatos = {
+        "json": "application/json",
+        "xml": "application/xml"
+    }
+    return {'Authorization': 'Bearer '+env('Admin'),
+# Content-Type lo seguimos dejando igual ya que esta linea lo que dice en que formato envia la informacion al servidor
+            'Content-Type': "application/json",
+# En este nuevo parámetro `Accept` indicamos el formato en el que queremos recibir la respuesta
+# Si `FORMATO_RESPUESTA` esta definido como "xml" pediremos una respuesta en XML
+# Si `FORMATO_RESPUESTA` no esta definido usaremos JSON por defecto
+            "Accept": formatos.get(env('FORMATO_RESPUESTA'), "application/json")
+            }
+
+# Ahora tengo que manejar esa respuesta correctamente, porque ahora ahora solo recibimos json, pero si recibimos un xml quiero parsearlo a json
+
+def obtener_parseador(response):
+    content_type = response.headers.get("Content-Type", "").lower()
+    if "application/json" in content_type:
+        return response.json
+    elif "application/xml" in content_type or "text/xml" in content_type:
+# creamos una funcion lambda ya que solo la vamos a usar en esta linea
+# xmltodict.parse(response.text): convierte un exml en un diccionario de python.
+# tengo que instalar el modulo xmltodict en mi requiriments.txt
+# json.dumps convierte el diccionario en una cadena json, con el indent=4 creamos las tabulaciones
+# json.loads convierte la cadeja ya indentada en un diccionario json
+        return lambda: json.loads(json.dumps(xmltodict.parse(response.text)))
+    else:
+        raise ValueError(f"Formato de respuesta desconocido: {content_type}")
+
+# Ahora si la respuesta de nuestro servidor es ok 
+    if(response.status_code == requests.codes.ok):
+# las citas es almacenaran en un json aun siendo la respuesta del servidor un xml
+        citas = obtener_parseador(response)()
+        return render(request, "citas/listar_citas.html",
+                      {"views_citas":citas})
+
+## ¿Siempre debemos tratar todos los errores en cada una de las peticiones?
+Voy a centralizar los errores en una funcion aparte que la voy a llamar manejar_errores(), asi evito duplicar codigo en cada vista, y si en el futuro queremos cambiar como manejar los errores solo debemos modificar la funcion
+
+def manejar_errores(request, response, formulario, template):
+# Este metodo solo se va a ejecutar si mi funcion api_buscar_cita no se sale usando el return dentro del bloque if que nos indica que el codigo es 200, osea que esta bien
+    try:
+        response.raise_for_status()
+    
+    except HTTPError as http_err:
+        print(f'Hubo un error en la petición: {http_err}')
+# Aqui manejo los errores creo un json con ellos y los voy metiendo uno a uno en el mofulario
+        if response.status_code == 400:
+            errores = response.json()           
+            for error in errores:
+                formulario.add_error(error, errores[error])
+
+            return render(request, template, {"formulario": formulario, "errores": errores})
+
+        else:
+            return mi_error_500(request)
+    
+    except RequestException as req_err:
+        print(f'Error de conexión: {req_err}')
+        return mi_error_500(request)
+    
+    except Exception as err:
+        print(f'Ocurrió un error inesperado: {err}')
+        return mi_error_500(request)
+
+# Ahora aplicamos la función en la vista api_buscar_cita().
+# Si la API devuelve un error, lo manejamos con manejar_errores()
+
+def api_buscar_cita(request):
+    if len(request.GET) > 0:
+        formulario = BusquedaAvanzadaCita(request.GET)       
+        try:
+            headers = crear_cabecera()
+            response = requests.get(
+                env('direccionservidorlocal') + "/api/" + env('version') + "/citas/buscar",
+                headers=headers,
+                params=formulario.data
+            )             
+
+            if response.status_code == requests.codes.ok:
+                citas = response.json()
+                return render(request, "citas/listar_citas.html", {"views_citas": citas})
+#           Aqui entrara si se ha hecho bien el response, osea que tenemos respuesta del servidor, pero el response no es con el codigo 200
+            return manejar_errores(request, response, formulario, "citas/busqueda_avanzada.html")
+
+        except Exception as err:
+            print(f'Ocurrió un error: {err}')
+            return mi_error_500(request)
+
+    else:
+        formulario = BusquedaAvanzadaCita(None)
+
+    return render(request, 'citas/busqueda_avanzada.html', {"formulario": formulario})
