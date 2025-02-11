@@ -116,7 +116,7 @@ def __init__(self, *args, **kwargs):
         required=True,
     )
     estacionesDisponibles=helper.obtener_estaciones_select()
-    self.fields["cita"] = forms.ChoiceField(
+    self.fields["estacion"] = forms.ChoiceField(
         choices=estacionesDisponibles,
         widget=forms.Select,
         required=True,

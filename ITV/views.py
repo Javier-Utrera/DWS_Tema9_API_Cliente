@@ -260,4 +260,49 @@ def api_buscar_trabajador(request):
 
 def api_crear_cita(request):
     if(request.method == "POST"):
-        return
+        try:
+            formulario = CrearCita(request.POST)
+            headers=crear_cabecera()
+            datos=formulario.data.copy()
+            
+            datos["fecha_matriculacion"] = str(
+                                            datetime.date(year=int(datos['fecha_publicacion_year']),
+                                                        month=int(datos['fecha_publicacion_month']),
+                                                        day=int(datos['fecha_publicacion_day']))
+                                             )
+            datos["fecha_propuesta"] = str(
+                                            datetime.date(year=int(datos['fecha_publicacion_year']),
+                                                        month=int(datos['fecha_publicacion_month']),
+                                                        day=int(datos['fecha_publicacion_day']))
+                                             )             
+            response = request.post(
+                env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"citas/crear",
+                headers=headers,
+                data=json.dumps(datos)
+            )
+            if(response.status_code == requests.codes.ok):
+                return redirect("citas/listar_citas")
+            else:
+                print(response.status_code)
+                response.raise_for_status()
+        except HTTPError as http_err:
+            print(f'Hubo un error en la petición: {http_err}')
+            if(response.status_code == 400):
+                errores = response.json()
+                for error in errores:
+                    formulario.add_error(error,errores[error])
+                return render(request, 
+                            'citas/create.html',
+                            {"formulario":formulario})
+            else:
+                return mi_error_500(request)
+        except Exception as err:
+            print(f'Ocurrió un error: {err}')
+            return mi_error_500(request)
+        
+    else:
+         formulario = CrearCita(None)
+    return render(request, 'citas/create.html',{"formulario":formulario})
+            
+            
+        
