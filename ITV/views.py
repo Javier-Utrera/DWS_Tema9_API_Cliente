@@ -12,6 +12,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'),True)
 env = environ.Env()
+
 # Diccionario de formatos según la versión de la API
 FORMATOS_POR_VERSION = {
     "v1": "json",
@@ -22,11 +23,7 @@ FORMATOS_POR_VERSION = {
 FORMATO_RESPUESTA = FORMATOS_POR_VERSION.get(env('VERSION_API'), "json")
 
 def crear_cabecera():
-    """
-    Crea las cabeceras necesarias para la petición HTTP.
-    - Content-Type siempre será application/json (porque estamos enviando JSON).
-    - Accept será application/json o application/xml, según la versión de la API.
-    """
+
     formatos = {
         "json": "application/json",
         "xml": "application/xml"
@@ -79,6 +76,7 @@ def manejar_errores(request, response, formulario, template):
 
 def index(request): 
     return render(request, 'index.html')
+
 def mi_error_400(request,exception=None):
     return render(request,"errores/400.html",None,None,400)
 
@@ -259,3 +257,7 @@ def api_buscar_trabajador(request):
     else:
         formulario = BusquedaAvanzadaTrabajador(None)
     return render(request, 'trabajadores/busqueda_avanzada.html',{"formulario":formulario})
+
+def api_crear_cita(request):
+    if(request.method == "POST"):
+        return
