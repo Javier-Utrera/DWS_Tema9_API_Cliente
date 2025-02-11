@@ -48,3 +48,4 @@ class BusquedaAvanzadaTrabajador(forms.Form):
     nombre=forms.CharField(required=False,label="Nombre")
     sueldo=forms.FloatField(required=False,label="Sueldo")
     puesto=forms.CharField(required=False,label="Puesto")
+#Necesito traerme los clientes y las estaciones   
