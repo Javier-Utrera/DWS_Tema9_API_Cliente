@@ -7,7 +7,7 @@
 {% block contenido %}
 
 {% load django_bootstrap5 %}
-<form action = "{% url 'editar_cita' cita.id %}" method = "post" enctype="multipart/form-data"> 
+<form action = "{% url 'api_editar_cita' cita.id %}" method = "post" enctype="multipart/form-data"> 
     {% load django_bootstrap5 %} 
     {% csrf_token %} 
 

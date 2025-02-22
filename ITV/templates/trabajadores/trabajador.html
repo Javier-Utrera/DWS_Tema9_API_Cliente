@@ -2,7 +2,7 @@
     <div class="card-body">
         <h5 class="card-title">Detalles del Trabajador</h5>
         <p class="card-text"><strong>Id Trabajador:</strong> {{ trabajador.id }}</p>
-        <p class="card-text"><strong>Nombre:</strong> {{ trabajador.usuario.username }}</p>
+        <p class="card-text"><strong>Nombre:</strong> {{ trabajador.nombre }}</p>
         <p class="card-text"><strong>Apellidos:</strong> {{ trabajador.apellidos }}</p>
         <p class="card-text"><strong>Puesto:</strong> {{ trabajador.puesto }}</p>
         <p class="card-text"><strong>Sueldo:</strong> {{ trabajador.sueldo }}</p>
@@ -63,23 +63,29 @@
         {% empty %}
         <h1>Lo siento, no existen vehiculos</h1>
     {% endfor %}
-        {% comment %} {% load bootstrap_icons %}
+        {% load bootstrap_icons %}
         <br>
         <div class="row btn-group">
             <div class="mb-2">
                 <button type="button" 
                         class="btn btn-outline-primary"> 
-                        <a href="{% url 'editar_trabajador' trabajador.id %}" ><span>{% bs_icon 'pencil' %}</span></a>
+                        <a href="{% url 'api_editar_trabajador' trabajador.id %}" ><span>{% bs_icon 'pencil' %}</span>Editar Trabajador</a>
                 </button>
             </div>
         </div>
         <div class="mb-2">
-            <form action = "{% url 'eliminar_trabajador' trabajador.id %}" method = "post"> 
+            <button type="button" 
+                    class="btn btn-outline-primary"> 
+                    <a href="{% url 'api_actualizar_trabajador_puesto' trabajador.id %}" ><span>{% bs_icon 'pencil' %}</span>Editar Puesto</a>
+            </button>
+        </div>
+        <div class="mb-2">
+            <form action = "{% url 'api_eliminar_trabajador' trabajador.id %}" method = "post"> 
                 {% csrf_token %}
                 <button class="btn btn-danger" onclick="return eliminar();" type="submit">
                     <span>{% bs_icon 'trash' %}</span>
                 </button> 
             </form>
-        </div>  {% endcomment %}
+        </div>
     </div>
 </div>

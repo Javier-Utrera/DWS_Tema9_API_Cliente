@@ -8,7 +8,7 @@
 
     {% load django_bootstrap5 %} 
 
-    <form action = "{% url 'buscar_local'%}" method = "GET">
+    <form action = "{% url 'api_buscar_local'%}" method = "GET">
       
         {% csrf_token %}
         

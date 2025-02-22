@@ -7,7 +7,7 @@
 {% block contenido %}
 
 {% load django_bootstrap5 %}
-<form action = "{% url 'editar_local' local.id %}" method = "post"> 
+<form action = "{% url 'api_editar_local' local.id %}" method = "post"> 
     {% load django_bootstrap5 %} 
     {% csrf_token %} 
 

@@ -1,7 +1,86 @@
 {% extends "estructura/padre.html"%}
 {% block cabecera %}
-<h1>Este es el indice</h1>
+
 {% endblock %}
 {% block contenido%}
-<p>Se ha movido el contenido del index a la estructura menu</p>
+<div class="container mt-5">
+    <h1 class="text-center text-uppercase fw-bold mb-4" style="color: #ffcc00; text-shadow: 0px 0px 8px rgba(255,204,0,0.8);">
+        Sistema de Gestión ITV
+    </h1>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        
+        <!-- Card: Listar -->
+        <div class="col">
+            <div class="card shadow-lg border-0 rounded-4 h-100" 
+                 style="background: linear-gradient(145deg, #0f2027, #203a43, #2c5364); color: white; box-shadow: 5px 5px 15px rgba(0,0,0,0.5);">
+                <div class="card-header text-white text-center fw-bold py-3"
+                     style="background: rgba(255, 255, 255, 0.1); border-bottom: 2px solid rgba(255,255,255,0.2); font-size: 1.5rem;">
+                    📋 Listados
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_listar_locales' %}" class="text-decoration-none text-light">🏠 Listar locales</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_listar_citas' %}" class="text-decoration-none text-light">📅 Listar citas</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_listar_trabajadores' %}" class="text-decoration-none text-light">👷 Listar trabajadores</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_listar_vehiculos' %}" class="text-decoration-none text-light">🚗 Listar vehículos</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_listar_inspecciones' %}" class="text-decoration-none text-light">🔎 Listar inspecciones</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_listar_clientes' %}" class="text-decoration-none text-light">🧑‍💼 Listar clientes</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Buscar -->
+        <div class="col">
+            <div class="card shadow-lg border-0 rounded-4 h-100" 
+                 style="background: linear-gradient(145deg, #1f4037, #99f2c8); color: white; box-shadow: 5px 5px 15px rgba(0,0,0,0.5);">
+                <div class="card-header text-white text-center fw-bold py-3"
+                     style="background: rgba(255, 255, 255, 0.1); border-bottom: 2px solid rgba(255,255,255,0.2); font-size: 1.5rem;">
+                    🔍 Búsquedas
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_buscar_local' %}" class="text-decoration-none text-light">🏠 Buscar local</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_buscar_cita' %}" class="text-decoration-none text-light">📅 Buscar cita</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_buscar_trabajador' %}" class="text-decoration-none text-light">👷 Buscar trabajador</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_buscar_vehiculo' %}" class="text-decoration-none text-light">🚗 Buscar vehículo</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_buscar_inspeccion' %}" class="text-decoration-none text-light">🔎 Buscar inspección</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Crear -->
+        <div class="col">
+            <div class="card shadow-lg border-0 rounded-4 h-100" 
+                 style="background: linear-gradient(145deg, #ff9966, #ff5e62); color: white; box-shadow: 5px 5px 15px rgba(0,0,0,0.5);">
+                <div class="card-header text-white text-center fw-bold py-3"
+                     style="background: rgba(255, 255, 255, 0.1); border-bottom: 2px solid rgba(255,255,255,0.2); font-size: 1.5rem;">
+                    ✨ Crear
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_crear_local' %}" class="text-decoration-none text-light">🏠 Crear local</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_crear_cita' %}" class="text-decoration-none text-light">📅 Crear cita</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_crear_trabajador' %}" class="text-decoration-none text-light">👷 Crear trabajador</a></li>
+                        <li class="list-group-item bg-transparent"><a href="{% url 'api_crear_vehiculo' %}" class="text-decoration-none text-light">🚗 Crear vehículo</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Botón flotante -->
+    <div class="position-fixed bottom-0 end-0 m-4">
+        <button class="btn btn-lg btn-danger shadow-lg rounded-circle p-3"
+                style="transition: transform 0.3s ease-in-out;"
+                onmouseover="this.style.transform='scale(1.2)'" 
+                onmouseout="this.style.transform='scale(1)'">
+            🚀
+        </button>
+    </div>
+
+</div>
 {% endblock%}

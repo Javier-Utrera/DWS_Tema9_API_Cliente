@@ -2,36 +2,46 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-danger px-4">
 
-  <a class="navbar-brand" href="#">
+  <a class="navbar-brand" href="{% url 'urls_index' %}">
     <img src="{% static  'imagenes/ba.jpg' %}" alt="" width="100" height="50" class="d-inline-block align-text-middle">
   </a>
-
-
 
   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#accionesBiblioteca"
     aria-controls="navbarAccionesBiblioteca" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
+  
   <div class="collapse navbar-collapse" id="accionesBiblioteca">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
       <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_clientes' %}">Listar clientes</a>
+        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_locales' %}">Listar locales</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_listar_citas' %}">Listar citas</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_listar_trabajadores' %}">Listar trabajadores</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_listar_vehiculos' %}">Listar vehiculos</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_listar_inspecciones' %}">Listar inspecciones</a>
+        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_clientes' %}">Listar clientes</a>
       </li>
 
       <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_local' %}">Buscar local</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_cita' %}">Buscar cita</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_inspeccion' %}">Buscar inspeccion</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_vehiculo' %}">Buscar vehiculo</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_trabajador' %}">Buscar trabajador</a>
+        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_vehiculo' %}">Buscar vehiculo</a>        
+        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_inspeccion' %}">Buscar inspeccion</a>
       </li>
 
       <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_local' %}">Crear local</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_crear_cita' %}">Crear cita</a>
+        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_trabajador' %}">Crear trabajador</a>
+        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_vehiculo' %}">Crear Vehiculo</a>
+      </li>
+      <li class="nav-item">
+        <h4>ViewSet</h4>
+        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_locales_viewset' %}">Listar local Vw</a>
+        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_local_viewset' %}">Buscar local Vw</a>
+        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_local_viewset' %}">Crear local Vw</a>
       </li>
   </div>
 </nav>

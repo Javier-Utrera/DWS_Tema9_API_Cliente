@@ -5,24 +5,51 @@
         <p class="card-text"><strong>Metros:</strong> {{ local.metros }}</p>
         <p class="card-text"><strong>Año de Arrendamiento:</strong> {{ local.anio_arrendamiento }}</p>
         <p class="card-text"><strong>Dueño:</strong> {{ local.duenio }}</p>
-    <br>
-    {% load bootstrap_icons %}
-    <div class="row btn-group">
-        <div class="mb-2">
-            <button type="button" 
-                    class="btn btn-outline-primary"> 
-                    <a href="{% url 'editar_local' local.id %}" ><span>{% bs_icon 'pencil' %}</span></a>
-            </button>
+        <br>
+        {% load bootstrap_icons %}
+        <div class="row btn-group">
+            <div class="mb-2">
+                <button type="button" 
+                        class="btn btn-outline-primary"> 
+                        <a href="{% url 'api_editar_local' local.id %}" ><span>{% bs_icon 'pencil' %}</span>Editar Local</a>
+                </button>
+            </div>
+            <div class="mb-2">
+                <button type="button" 
+                        class="btn btn-outline-primary"> 
+                        <a href="{% url 'api_actualizar_local_duenio' local.id %}" ><span>{% bs_icon 'pencil' %}</span>Editar Dueño</a>
+                </button>
+            </div>
+            <div class="mb-2">
+                <form action = "{% url 'api_eliminar_local' local.id %}" method = "post"> 
+                    {% csrf_token %}
+                    <button class="btn btn-danger" onclick="return eliminar();" type="submit">
+                        <span>{% bs_icon 'trash' %}</span>
+                    </button> 
+                </form>
+            </div>
         </div>
-        <div class="mb-2">
-            <form action = "{% url 'eliminar_local' local.id %}" method = "post"> 
-                {% csrf_token %}
-                <button class="btn btn-danger" onclick="return eliminar();" type="submit">
-                    <span>{% bs_icon 'trash' %}</span>
-                </button> 
-            </form>
+        <div class="row btn-group">
+            <div class="mb-2">
+                <button type="button" 
+                        class="btn btn-outline-primary"> 
+                        <a href="{% url 'api_editar_local_viewset' local.id %}" ><span>{% bs_icon 'pencil' %}</span>Editar LocalVw</a>
+                </button>
+            </div>
+            <div class="mb-2">
+                <button type="button" 
+                        class="btn btn-outline-primary"> 
+                        <a href="{% url 'api_actualizar_local_duenio_viewset' local.id %}" ><span>{% bs_icon 'pencil' %}</span>Editar DueñoVw</a>
+                </button>
+            </div>
+            <div class="mb-2">
+                <form action = "{% url 'api_eliminar_local_viewset' local.id %}" method = "post"> 
+                    {% csrf_token %}
+                    <button class="btn btn-danger" onclick="return eliminar();" type="submit">
+                        <span>{% bs_icon 'trash' %}</span>
+                    </button> 
+                </form>
+            </div>
         </div>
     </div>
-    </div>
-    
 </div>

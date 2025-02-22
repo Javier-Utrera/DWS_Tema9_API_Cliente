@@ -15,20 +15,22 @@
     {% endblock%}
 </head>
 <body>
+    <div class="d-flex flex-column min-vh-100">
+        {% include 'estructura/menu.html' %}
 
-    {% include 'estructura/menu.html'%}
+        <div class="flex-grow-1 d-flex flex-column justify-content-start">
+            <div class="container py-4">
+                {% block cabecera %}
+                {% endblock %}
 
-    
-    <div class="container p-2">
-        
-        {% block cabecera%}
-        {% endblock%}
+                {% block contenido %}
+                {% endblock %}
+            </div>
+        </div>
 
-        {% block contenido%}
-        {% endblock%}
-
+        <div class="mt-auto">
+            {% include 'estructura/footer.html' %}
+        </div>
     </div>
-
-    {% include 'estructura/footer.html'%}
 </body>
 </html>
