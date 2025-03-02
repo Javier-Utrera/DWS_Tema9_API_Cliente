@@ -8,6 +8,8 @@ import environ
 import os
 from pathlib import Path
 from django.contrib import messages
+from datetime import datetime
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'),True)
@@ -48,7 +50,7 @@ def manejar_errores(request, response, formulario, template):
         print(f'Ocurrió un error inesperado: {err}')
         return mi_error_500(request)
 
-def index(request): 
+def index(request):
     return render(request, 'index.html')
 
 
@@ -68,276 +70,33 @@ def mi_error_500(request,exception=None):
 
 
 def api_listar_clientes(request):
-    if (request.user.is_anonymous==False):     
-        if (request.user and request.user.rol == 1):       
-            headers = {'Authorization': 'Bearer '+env('Admin')} 
-        elif (request.user and request.user.rol == 2):
-            headers = {'Authorization': 'Bearer '+env('Cliente')} 
-        else:
-            headers = {'Authorization': 'Bearer '+env('Trabajador')}
-    else:
-        headers = {'Authorization': 'Bearer '+env('Admin')}     
-    response = requests.get(env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/clientes/listar_clientes",headers=headers)
-    clientes= response.json()
-    return render(request,"clientes/listar_clientes.html",{'views_listar_cliente':clientes})
+    result = helper.api_request(request, "get", "clientes/listar_clientes")
+    if hasattr(result, "status_code"):
+        return result
+    return render(request, "clientes/listar_clientes.html", {'views_listar_cliente': result})
 
 def api_listar_inspecciones(request):
-    if (request.user.is_anonymous==False):     
-        if (request.user and request.user.rol == 1):       
-            headers = {'Authorization': 'Bearer '+env('Admin')} 
-        elif (request.user and request.user.rol == 2):
-            headers = {'Authorization': 'Bearer '+env('Cliente')} 
-        else:
-            headers = {'Authorization': 'Bearer '+env('Trabajador')}
-    else:
-        headers = {'Authorization': 'Bearer '+env('Admin')}        
-    response = requests.get(env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/inspecciones/listar_inspecciones",headers=headers)
-    inspecciones= response.json()
-    return render(request,"inspecciones/listar_inspecciones.html",{'views_inspecciones_vehiculo':inspecciones})
-
-#-----------------------------------------------------------
+    result = helper.api_request(request, "get", "inspecciones/listar_inspecciones")
+    if hasattr(result, "status_code"):
+        return result
+    return render(request, "inspecciones/listar_inspecciones.html", {'views_inspecciones_vehiculo': result})
 
 def api_buscar_inspeccion(request):
-    if(len(request.GET) > 0):
-        formulario = BusquedaAvanzadaInspeccion(request.GET)       
-        try:
-            headers = crear_cabecera()
-            response = requests.get(
-                env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/inspecciones/buscar",
-                headers=headers,
-                params=formulario.data
-            )             
-            if(response.status_code == requests.codes.ok):
-                inspecciones = response.json()
-                return render(request,"inspecciones/listar_inspecciones.html",{
-                    "views_inspecciones_vehiculo":inspecciones})
-
-            return manejar_errores(request, response, formulario, "inspecciones/busqueda_avanzada.html")
+    if len(request.GET) > 0:
+        formulario = BusquedaAvanzadaInspeccion(request.GET)
+        result = helper.api_request(request, "get", "inspecciones/buscar", params=formulario.data)
         
-        except Exception as err:
-            print(f'Ocurrió un error: {err}')
-            return mi_error_500(request)
+        if hasattr(result, "status_code"):
+            return result
+        
+        return render(request, "inspecciones/listar_inspecciones.html", {"views_inspecciones_vehiculo": result})
+    
     else:
         formulario = BusquedaAvanzadaInspeccion(None)
-    return render(request, 'inspecciones/busqueda_avanzada.html',{"formulario":formulario})
-
+    
+    return render(request, "inspecciones/busqueda_avanzada.html", {"formulario": formulario})
 
 #-----------------------------------------------------------
-#Metodos sin refactorizar
-# def api_listar_locales(request):
-#     if request.user.is_authenticated:     
-#         if request.user.rol == 1:       
-#             headers = {'Authorization': 'Bearer ' + env('Admin')} 
-#         elif request.user.rol == 2:
-#             headers = {'Authorization': 'Bearer ' + env('Cliente')} 
-#         else:
-#             headers = {'Authorization': 'Bearer ' + env('Trabajador')}
-#     else:
-#         headers = {'Authorization': 'Bearer ' + env('Admin')}       
-    
-#     response = requests.get(env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/locales/listar_locales", headers=headers)
-#     locales = response.json()
-#     return render(request, "locales/listar_local.html", {'views_locales': locales})
-
-# def api_buscar_local(request):
-#     if len(request.GET) > 0:
-#         formulario = BusquedaAvanzadaLocal(request.GET)       
-#         try:
-#             headers = crear_cabecera()
-#             response = requests.get(
-#                 env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/locales/buscar",
-#                 headers=headers,
-#                 params=formulario.data
-#             )             
-#             if response.status_code == requests.codes.ok:
-#                 locales = response.json()
-#                 return render(request, "locales/listar_local.html", {"views_locales": locales})
-        
-#             return manejar_errores(request, response, formulario, "locales/busqueda_avanzada.html")
-        
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-#     else:
-#         formulario = BusquedaAvanzadaLocal(None)
-#     return render(request, 'locales/busqueda_avanzada.html', {"formulario": formulario})
-
-# def api_crear_local(request):
-#     if request.method == "POST":
-#         try:
-#             formulario = CrearLocal(request.POST)
-#             headers = crear_cabecera()
-#             datos = formulario.data.copy()
-#             datos["anio_arrendamiento"] = str(
-#                 datetime.date(
-#                     year=int(request.POST["anio_arrendamiento_year"]),
-#                     month=int(request.POST["anio_arrendamiento_month"]),
-#                     day=int(request.POST["anio_arrendamiento_day"])
-#                 )
-#             )
-#             datos["metros"] = float(datos["metros"])
-           
-#             response = requests.post(
-#                 env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/locales/crear",
-#                 headers=headers,
-#                 data=json.dumps(datos)
-#             )
-#             if response.status_code == requests.codes.ok:
-#                 mensaje = response.text
-#                 messages.success(request, mensaje)  
-#                 return redirect("api_listar_locales")
-#             else:
-#                 print(response.status_code)
-#                 response.raise_for_status()
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, 'locales/create.html', {"formulario": formulario})
-#             else:
-#                 return mi_error_500(request)
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-        
-#     else:
-#         formulario = CrearLocal(None)
-#     return render(request, 'locales/create.html', {"formulario": formulario})
-
-# def api_editar_local(request, local_id):
-#     datosFormulario = None 
-#     if request.method == "POST": 
-#         datosFormulario = request.POST 
-
-#     local = helper.obtener_local(local_id)
-
-#     formulario = CrearLocal(datosFormulario,
-#         initial={
-#             "precio": local["precio"],
-#             "metros": local["metros"],
-#             "anio_arrendamiento": local["anio_arrendamiento"],
-#             "duenio": local["duenio"]
-#         }
-#     )
-
-#     if request.method == "POST":
-#         try:
-#             formulario = CrearLocal(request.POST)
-#             if formulario.is_valid():
-#                 headers = crear_cabecera()
-#                 datos = formulario.cleaned_data.copy()
-#                 datos["anio_arrendamiento"] = str(
-#                     datetime.date(
-#                         year=int(request.POST["anio_arrendamiento_year"]),
-#                         month=int(request.POST["anio_arrendamiento_month"]),
-#                         day=int(request.POST["anio_arrendamiento_day"])
-#                     )
-#                 )                 
-#                 datos["metros"] = float(datos["metros"])
-
-#                 response = requests.put(
-#                     env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/locales/editar/"+str(local_id),
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-                
-#                 if response.status_code == requests.codes.ok:
-#                     mensaje = response.text
-#                     messages.success(request, mensaje)                  
-#                     return redirect("api_listar_locales")
-#                 else:
-#                     print(response.status_code)
-#                     response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "locales/actualizar.html", {"formulario": formulario})
-#             else:
-#                 return mi_error_500(request)
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     return render(request, "locales/actualizar.html", {
-#         "formulario": formulario,
-#         "local": local
-#     })
-
-# def api_actualizar_local_duenio(request, local_id):
-#     datosFormulario = None
-
-#     if request.method == "POST":
-#         datosFormulario = request.POST 
-
-#     local = helper.obtener_local(local_id)
-
-#     formulario = LocalActualizarDuenioForm(datosFormulario,
-#         initial={"duenio": local["duenio"]}
-#     )
-
-#     if request.method == "POST":
-#         try:
-#             formulario = LocalActualizarDuenioForm(request.POST)
-#             if formulario.is_valid():
-#                 headers = crear_cabecera()
-#                 datos = request.POST.copy()
-
-#                 response = requests.patch(
-#                     env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/locales/actualizar/duenio/"+str(local_id),
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-
-#                 if response.status_code == requests.codes.ok:
-#                     mensaje = response.text
-#                     messages.success(request, mensaje)  
-#                     return redirect("api_listar_locales")
-#                 else:
-#                     print(response.status_code)
-#                     response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "locales/actualizar_duenio.html", {"formulario": formulario, "local": local})
-#             else:
-#                 return mi_error_500(request)
-
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     return render(request, "locales/actualizar_duenio.html", {
-#         "formulario": formulario,
-#         "local": local
-#     })
-
-# def api_eliminar_local(request, local_id):
-#     try:
-#         headers = crear_cabecera()
-#         response = requests.delete(
-#             env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/locales/eliminar/"+str(local_id),
-#             headers=headers,
-#         )
-#         if response.status_code == requests.codes.ok:
-#             mensaje = response.text
-#             messages.success(request, mensaje)  
-#             return redirect("api_listar_locales")
-#         else:
-#             print(response.status_code)
-#             response.raise_for_status()
-#     except Exception as err:
-#         print(f'Ocurrió un error: {err}')
-#         return mi_error_500(request)
 
 #Metodos refactorizados
 
@@ -444,240 +203,6 @@ def api_eliminar_local(request, local_id):
     return redirect("api_listar_locales")
 
 #-----------------------------------------------------------
-
-# def api_listar_citas(request):
-    
-#     if (request.user.is_anonymous==False):     
-#         if (request.user and request.user.rol == 1):       
-#             headers = {'Authorization': 'Bearer '+env('Admin')} 
-#         elif (request.user and request.user.rol == 2):
-#             headers = {'Authorization': 'Bearer '+env('Cliente')} 
-#         else:
-#             headers = {'Authorization': 'Bearer '+env('Trabajador')}
-#     else:
-#         headers = {'Authorization': 'Bearer '+env('Admin')}       
-    
-#     response = requests.get(env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/citas/listar_citas",headers=headers)
-#     citas= response.json()
-#     return render(request,"citas/listar_citas.html",{'views_citas':citas})
-
-# def api_buscar_cita(request):
-#     if(len(request.GET) > 0):
-#         formulario = BusquedaAvanzadaCita(request.GET)       
-#         try:
-#             headers = crear_cabecera()
-#             response = requests.get(
-#                 env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/citas/buscar",
-#                 headers=headers,
-#                 params=formulario.data
-#             )             
-#             if(response.status_code == requests.codes.ok):
-#                 citas = response.json()
-#                 return render(request, "citas/listar_citas.html",
-#                               {"views_citas":citas})
-        
-#             return manejar_errores(request, response, formulario, "citas/busqueda_avanzada.html")
-        
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-#     else:
-#         formulario = BusquedaAvanzadaCita(None)
-#     return render(request, 'citas/busqueda_avanzada.html',{"formulario":formulario})
-
-# def api_crear_cita(request):
-#     if(request.method == "POST"):
-#         try:
-#             formulario = CrearCita(request.POST)
-#             headers=crear_cabecera()
-#             datos=formulario.data.copy()
-            
-#             datos["fecha_matriculacion"] = str(
-#                                             datetime.date(year=int(datos['fecha_matriculacion_year']),
-#                                                         month=int(datos['fecha_matriculacion_month']),
-#                                                         day=int(datos['fecha_matriculacion_day']))
-#                                              )
-#             datos["fecha_propuesta"] = str(
-#                                             datetime.date(year=int(datos['fecha_propuesta_year']),
-#                                                         month=int(datos['fecha_propuesta_month']),
-#                                                         day=int(datos['fecha_propuesta_day']))
-#                                              )             
-#             response = requests.post(
-#                 env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/citas/crear",
-#                 headers=headers,
-#                 data=json.dumps(datos)
-#             )
-#             if(response.status_code == requests.codes.ok):
-#                 mensaje = response.text
-#                 messages.success(request, mensaje)  
-#                 return redirect("api_listar_citas")
-#             else:
-#                 print(response.status_code)
-#                 response.raise_for_status()
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if(response.status_code == 400):
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error,errores[error])
-#                 return render(request, 
-#                             'citas/create.html',
-#                             {"formulario":formulario})
-#             else:
-#                 return mi_error_500(request)
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-        
-#     else:
-#          formulario = CrearCita(None)
-#     return render(request, 'citas/create.html',{"formulario":formulario})
-
-# def api_editar_cita(request, cita_id):
-#     datosFormulario = None 
-#     if request.method == "POST": 
-#         datosFormulario = request.POST 
-#     cita = helper.obtener_cita(cita_id)
-#     formulario = CrearCita(datosFormulario,
-#         initial={
-#             "cliente": cita["cliente"]["id"],
-#             "estacion": cita["estacion"]["id"],
-#             "matricula": cita["matricula"],
-#             "fecha_matriculacion": datetime.datetime.strptime(cita["fecha_matriculacion"], "%Y-%m-%d").date(),
-#             "numero_bastidor": cita["numero_bastidor"],
-#             "tipo_inspeccion": cita["tipo_inspeccion"],
-#             "remolque": cita["remolque"],
-#             "tipo_pago": cita["tipo_pago"],
-#             "fecha_propuesta": datetime.datetime.strptime(cita["fecha_propuesta"], "%Y-%m-%d").date(),
-#             "hora_propuesta": cita["hora_propuesta"]
-#         }
-#     )
-#     if request.method == "POST":
-#         try:
-#             formulario = CrearCita(request.POST)
-#             if formulario.is_valid():
-#                 headers = crear_cabecera()
-#                 datos = formulario.cleaned_data.copy()
-
-#                 datos["fecha_matriculacion"] = str(datetime.date(
-#                     year=int(request.POST["fecha_matriculacion_year"]),
-#                     month=int(request.POST["fecha_matriculacion_month"]),
-#                     day=int(request.POST["fecha_matriculacion_day"])
-#                 ))
-                
-#                 datos["fecha_propuesta"] = str(datetime.date(
-#                     year=int(request.POST["fecha_propuesta_year"]),
-#                     month=int(request.POST["fecha_propuesta_month"]),
-#                     day=int(request.POST["fecha_propuesta_day"])
-#                 ))
-                
-#                 datos["hora_propuesta"] = str(formulario.cleaned_data["hora_propuesta"])
-                
-#                 response = requests.put(
-#                     env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/citas/editar/"+str(cita_id),
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-                
-#                 if(response.status_code == requests.codes.ok):
-#                     mensaje = response.text
-#                     messages.success(request, mensaje)                  
-#                     return redirect("api_listar_citas")
-#                 else:
-#                     print(response.status_code)
-#                     response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "citas/actualizar.html", {"formulario": formulario})
-#             else:
-#                 return mi_error_500(request)
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     return render(request, "citas/actualizar.html", {
-#         "formulario": formulario,
-#         "cita": cita
-#     })
-    
-# def api_cita_actualizar_matricula(request, cita_id):
-
-#     datosFormulario = None
-
-#     if request.method == "POST":
-#         datosFormulario = request.POST 
-
-#     cita = helper.obtener_cita(cita_id)
-
-#     formulario = CitaActualizarMatriculaForm(datosFormulario,
-#         initial={
-#             "matricula": cita["matricula"],
-#         }
-#     )
-
-#     if request.method == "POST":
-#         try:
-#             formulario = CitaActualizarMatriculaForm(request.POST)
-#             if formulario.is_valid():
-#                 headers = crear_cabecera()
-#                 datos = request.POST.copy()
-
-#                 response = requests.patch(
-#                     env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/citas/actualizar/matricula/"+str(cita_id),
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-
-#                 if (response.status_code == requests.codes.ok):
-#                     mensaje = response.text
-#                     messages.success(request, mensaje)  
-#                     return redirect("api_listar_citas")
-#                 else:
-#                     print(response.status_code)
-#                     response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "citas/actualizar_matricula.html", {"formulario": formulario, "cita": cita})
-#             else:
-#                 return mi_error_500(request)
-
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     return render(request, "citas/actualizar_matricula.html", {
-#         "formulario": formulario,
-#         "cita": cita
-#     })
-    
-# def api_eliminar_cita(request,cita_id):
-#     try:
-#         headers= crear_cabecera()
-#         response = requests.delete(
-#             env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/citas/eliminar/"+str(cita_id),
-#             headers=headers,
-#         )
-#         if(response.status_code == requests.codes.ok):
-#             mensaje = response.text
-#             messages.success(request, mensaje)  
-#             return redirect("api_listar_citas")
-#         else:
-#             print(response.status_code)
-#             response.raise_for_status()
-#     except Exception as err:
-#         print(f'Ocurrió un error: {err}')
-#         return mi_error_500(request)
-#     return redirect('api_listar_citas')
 
 #Metodos refactorizados
 
@@ -799,227 +324,6 @@ def api_eliminar_cita(request, cita_id):
 
 #-----------------------------------------------------------
 
-# def api_listar_trabajadores(request):
-#     if (request.user.is_anonymous==False):     
-#         if (request.user and request.user.rol == 1):       
-#             headers = {'Authorization': 'Bearer '+env('Admin')} 
-#         elif (request.user and request.user.rol == 2):
-#             headers = {'Authorization': 'Bearer '+env('Cliente')} 
-#         else:
-#             headers = {'Authorization': 'Bearer '+env('Trabajador')}
-#     else:
-#         headers = {'Authorization': 'Bearer '+env('Admin')}     
-#     response = requests.get(env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/trabajadores/listar_trabajadores",headers=headers)
-#     trabajadores= response.json()
-#     return render(request,"trabajadores/listar_trabajadores.html",{'views_trabajadores_estacion':trabajadores})
-
-# def api_buscar_trabajador(request):
-#     if(len(request.GET) > 0):
-#         formulario = BusquedaAvanzadaTrabajador(request.GET)       
-#         try:
-#             headers = crear_cabecera()
-#             response = requests.get(
-#                 env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/trabajadores/buscar",
-#                 headers=headers,
-#                 params=formulario.data
-#             )             
-#             if(response.status_code == requests.codes.ok):
-#                 trabajadores = response.json()
-#                 return render(request,"trabajadores/listar_trabajadores.html",{
-#                     "views_trabajadores_estacion":trabajadores})
-            
-#             return manejar_errores(request, response, formulario, "trabajadores/busqueda_avanzada.html")
-        
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-#     else:
-#         formulario = BusquedaAvanzadaTrabajador(None)
-#     return render(request, 'trabajadores/busqueda_avanzada.html',{"formulario":formulario})
-
-# def api_crear_trabajador(request):
-#     if request.method == "POST":
-#         try:
-#             formulario = CrearTrabajador(request.POST)
-#             headers = crear_cabecera()
-#             datos = formulario.data.copy()
-            
-#             datos["estacion"] = request.POST.getlist("estacion")
-
-#             response = requests.post(
-#                 env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/trabajadores/crear",
-#                 headers=headers,
-#                 data=json.dumps(datos)
-#             )
-
-#             if response.status_code == requests.codes.ok:
-#                 mensaje = response.text
-#                 messages.success(request, mensaje)
-#                 return redirect("api_listar_trabajadores")
-#             else:
-#                 print(response.status_code)
-#                 response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "trabajadores/create.html", {"formulario": formulario})
-#             else:
-#                 return mi_error_500(request)
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     else:
-#         formulario = CrearTrabajador(None)
-#     return render(request, "trabajadores/create.html", {"formulario": formulario})
-
-# def api_editar_trabajador(request, trabajador_id):
-#     datosFormulario = None
-
-#     if request.method == "POST":
-#         datosFormulario = request.POST
-
-#     trabajador = helper.obtener_trabajador(trabajador_id)
-
-#     estaciones_disponibles = helper.obtener_estaciones_select()
-
-#     formulario = CrearTrabajador(datosFormulario,
-#         initial={
-#             "email": trabajador["email"],
-#             "nombre": trabajador["nombre"],
-#             "apellidos": trabajador["apellidos"],
-#             "puesto": trabajador["puesto"],
-#             "sueldo": trabajador["sueldo"],
-#             "observaciones": trabajador["observaciones"],
-#             "estacion": [estacion["id"] for estacion in trabajador["estacion"]]
-#         }
-#     )
-
-#     if request.method == "POST":
-#         try:
-#             formulario = CrearTrabajador(request.POST)
-#             if formulario.is_valid():
-#                 headers = crear_cabecera()
-#                 datos = request.POST.copy()
-
-#                 datos["estacion"] = request.POST.getlist("estacion")
-
-#                 response = requests.put(
-#                     env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/trabajadores/editar/"+str(trabajador_id),
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-
-#                 if response.status_code == requests.codes.ok:
-#                     mensaje = response.text
-#                     messages.success(request, mensaje)
-#                     return redirect("api_listar_trabajadores")
-#                 else:
-#                     response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "trabajadores/actualizar.html", {
-#                     "formulario": formulario,
-#                     "trabajador": trabajador,
-#                     "estaciones": estaciones_disponibles
-#                 })
-#             else:
-#                 return mi_error_500(request)
-
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     return render(request, "trabajadores/actualizar.html", {
-#         "formulario": formulario,
-#         "trabajador": trabajador,
-#         "estaciones": estaciones_disponibles
-#     })
-
-# def api_actualizar_trabajador_puesto(request, trabajador_id):
-#     datosFormulario = None  
-
-#     if request.method == "POST":
-#         datosFormulario = request.POST  
-
-#     trabajador = helper.obtener_trabajador(trabajador_id)
-
-#     formulario = TrabajadorActualizarPuestoForm(datosFormulario,
-#         initial={
-#             "puesto": trabajador["puesto"]
-#         }
-#     )
-
-#     if request.method == "POST":
-#         try:
-#             formulario = TrabajadorActualizarPuestoForm(request.POST)
-#             if formulario.is_valid():
-#                 headers = crear_cabecera()
-#                 datos = request.POST.copy()
-
-#                 response = requests.patch(
-#                     env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/trabajadores/actualizar/puesto/"+str(trabajador_id),
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-
-#                 if response.status_code == requests.codes.ok:
-#                     mensaje = response.text
-#                     messages.success(request, mensaje)
-#                     return redirect("api_listar_trabajadores")
-#                 else:
-#                     print(response.status_code)
-#                     response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "trabajadores/actualizar_puesto.html", {"formulario": formulario, "trabajador": trabajador})
-#             else:
-#                 return mi_error_500(request)
-
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     return render(request, "trabajadores/actualizar_puesto.html", {
-#         "formulario": formulario,
-#         "trabajador": trabajador
-#     })
-
-# def api_eliminar_trabajador(request, trabajador_id):
-#     try:
-#         headers = crear_cabecera()
-#         response = requests.delete(
-#             env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/trabajadores/eliminar/"+str(trabajador_id),
-#             headers=headers,
-#         )
-#         if response.status_code == requests.codes.ok:
-#             mensaje = response.text
-#             messages.success(request, mensaje)
-#             return redirect("api_listar_trabajadores")
-#         else:
-#             print(response.status_code)
-#             response.raise_for_status()
-
-#     except Exception as err:
-#         print(f'Ocurrió un error: {err}')
-#         return mi_error_500(request)
-
-#     return redirect("api_listar_trabajadores")
-
 #Metodos refactorizados
 
 def api_listar_trabajadores(request):
@@ -1116,224 +420,6 @@ def api_eliminar_trabajador(request, trabajador_id):
     return redirect("api_listar_trabajadores")
 
 #-----------------------------------------------------------
-
-# def api_listar_vehiculos(request):   
-#     if (request.user.is_anonymous==False):     
-#         if (request.user and request.user.rol == 1):       
-#             headers = {'Authorization': 'Bearer '+env('Admin')} 
-#         elif (request.user and request.user.rol == 2):
-#             headers = {'Authorization': 'Bearer '+env('Cliente')} 
-#         else:
-#             headers = {'Authorization': 'Bearer '+env('Trabajador')}
-#     else:
-#         headers = {'Authorization': 'Bearer '+env('Admin')}        
-    
-#     response = requests.get(env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/vehiculos/listar_vehiculos",headers=headers)
-#     vehiculos= response.json()
-#     return render(request,"vehiculos/listar_vehiculos.html",{'views_vehiculos':vehiculos})
-
-# def api_buscar_vehiculo(request):
-#     if(len(request.GET) > 0):
-#         formulario = BusquedaAvanzadaVehiculo(request.GET)       
-#         try:
-#             headers = crear_cabecera()
-#             response = requests.get(
-#                 env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/vehiculos/buscar",
-#                 headers=headers,
-#                 params=formulario.data
-#             )             
-#             if(response.status_code == requests.codes.ok):
-#                 vehiculos = response.json()
-#                 return render(request,"vehiculos/listar_vehiculos.html",{
-#                     "views_vehiculos":vehiculos})
-            
-#             return manejar_errores(request, response, formulario, "vehiculos/busqueda_avanzada.html")
-        
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-#     else:
-#         formulario = BusquedaAvanzadaVehiculo(None)
-#     return render(request, 'vehiculos/busqueda_avanzada.html',{"formulario":formulario})
-
-# def api_crear_vehiculo(request):
-#     if request.method == "POST":
-#         formulario = CrearVehiculo(request.POST)
-#         if formulario.is_valid():
-#             headers = crear_cabecera()
-#             datos = request.POST.copy()
-#             datos["trabajadores"] = json.loads(request.POST["trabajadores"])
-#             datos["fecha_matriculacion"] = str(
-#                                             datetime.date(year=int(datos['fecha_matriculacion_year']),
-#                                                         month=int(datos['fecha_matriculacion_month']),
-#                                                         day=int(datos['fecha_matriculacion_day']))
-#                                              )            
-#             response = requests.post(
-#                 env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/vehiculos/crear",
-#                 headers=headers,
-#                 data=json.dumps(datos)
-#             )
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, "Vehículo creado correctamente")
-#                 return redirect("api_listar_vehiculos")
-#             else:
-#                 messages.error(request, "Error al crear el vehículo")
-    
-#     else:
-#         formulario = CrearVehiculo()
-    
-#     return render(request, "vehiculos/create.html", {"formulario": formulario})
-
-# def api_editar_vehiculo(request, vehiculo_id):  
-#     datosFormulario = None
-
-#     if request.method == "POST":
-#         datosFormulario = request.POST
-
-#     vehiculo = helper.obtener_vehiculo(vehiculo_id)
-
-#     formulario = CrearVehiculo(datosFormulario, initial={
-#         "marca": vehiculo["marca"],
-#         "modelo": vehiculo["modelo"],
-#         "numero_bastidor": vehiculo["numero_bastidor"],
-#         "tipo_vehiculo": vehiculo["tipo_vehiculo"],
-#         "cilindrada": vehiculo["cilindrada"],
-#         "potencia": vehiculo["potencia"],
-#         "combustible": vehiculo["combustible"],
-#         "mma": vehiculo["mma"],
-#         "asientos": vehiculo["asientos"],
-#         "ejes": vehiculo["ejes"],
-#         "dni_propietario": vehiculo["dni_propietario"],
-#         "matricula": vehiculo["matricula"],
-#         "fecha_matriculacion": vehiculo["fecha_matriculacion"],
-#         "trabajadores": [trabajador["id"] for trabajador in vehiculo["trabajadores"]]
-#     })
-
-#     if request.method == "POST":
-#         try:
-#             formulario = CrearVehiculo(request.POST)
-#             if formulario.is_valid():
-#                 headers = crear_cabecera()
-#                 datos = request.POST.copy()
-
-#                 # convierto lista de strings a lista de enteros
-#                 datos["trabajadores"] = list(map(int, request.POST.getlist("trabajadores")))
-
-#                 datos["fecha_matriculacion"] = str(datetime.date(
-#                     year=int(request.POST["fecha_matriculacion_year"]),
-#                     month=int(request.POST["fecha_matriculacion_month"]),
-#                     day=int(request.POST["fecha_matriculacion_day"])
-#                 ))               
-
-
-#                 response = requests.put(
-#                     f"{env('direccionservidorlocal')}/api/{env('VERSION_API')}/vehiculos/editar/{vehiculo_id}",
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-
-#                 if response.status_code == requests.codes.ok:
-#                     mensaje = response.text
-#                     messages.success(request, mensaje)
-#                     return redirect("api_listar_vehiculos")
-#                 else:
-#                     response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "vehiculos/actualizar.html", {
-#                     "formulario": formulario,
-#                     "vehiculo": vehiculo
-#                 })
-#             else:
-#                 return mi_error_500(request)
-
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     return render(request, "vehiculos/actualizar.html", {
-#         "formulario": formulario,
-#         "vehiculo": vehiculo
-#     })
-
-# def api_actualizar_matricula_vehiculo(request, vehiculo_id):
-#     datosFormulario = None  
-
-#     if request.method == "POST":
-#         datosFormulario = request.POST  
-
-#     vehiculo = helper.obtener_vehiculo(vehiculo_id)
-#     print(vehiculo)
-#     formulario = VehiculoActualizarMatriculaForm(datosFormulario,
-#         initial={
-#             "matricula": vehiculo["matricula"]
-#         }
-#     )
-
-#     if request.method == "POST":
-#         try:
-#             formulario = VehiculoActualizarMatriculaForm(request.POST)
-#             if formulario.is_valid():
-#                 headers = crear_cabecera()
-#                 datos = request.POST.copy()
-
-#                 response = requests.patch(
-#                     env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/vehiculos/actualizar/matricula/"+str(vehiculo_id),
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-
-#                 if response.status_code == requests.codes.ok:
-#                     mensaje = response.text
-#                     messages.success(request, mensaje)
-#                     return redirect("api_listar_vehiculos")
-#                 else:
-#                     response.raise_for_status()
-
-#         except HTTPError as http_err:
-#             print(f'Hubo un error en la petición: {http_err}')
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, "vehiculos/actualizar_matricula.html", {"formulario": formulario, "vehiculo": vehiculo})
-#             else:
-#                 return mi_error_500(request)
-
-#         except Exception as err:
-#             print(f'Ocurrió un error: {err}')
-#             return mi_error_500(request)
-
-#     return render(request, "vehiculos/actualizar_matricula.html", {
-#         "formulario": formulario,
-#         "vehiculo": vehiculo
-#     })
-
-# def api_eliminar_vehiculo(request, vehiculo_id):
-#     try:
-#         headers = crear_cabecera()
-#         response = requests.delete(
-#             env('direccionservidorlocal')+"/api/"+env('VERSION_API')+"/vehiculos/eliminar/"+str(vehiculo_id),
-#             headers=headers,
-#         )
-#         if response.status_code == requests.codes.ok:
-#             mensaje = response.text
-#             messages.success(request, mensaje)
-#             return redirect("api_listar_vehiculos")
-#         else:
-#             print(response.status_code)
-#             response.raise_for_status()
-
-#     except Exception as err:
-#         print(f'Ocurrió un error: {err}')
-#         return mi_error_500(request)
-
-#     return redirect("api_listar_vehiculos")
 
 #Metodos refactorizados
 
@@ -1441,6 +527,8 @@ def api_eliminar_vehiculo(request, vehiculo_id):
         return result
     messages.success(request, result)
     return redirect("api_listar_vehiculos")
+
+#-----------------------------------------------------------
 
 #CRUD ViewSet
 def api_listar_locales_viewset(request):
@@ -1554,3 +642,94 @@ def api_eliminar_local_viewset(request, local_id):
         return result
     messages.success(request, result)
     return redirect("api_listar_locales_viewset")
+
+#-----------------------------------------------------------
+
+#Registro
+def api_registrar_usuario(request):
+    if (request.method == "POST"):
+        try:
+            formulario = RegistroForm(request.POST)
+            if(formulario.is_valid()):
+                datos = request.POST.copy()
+                
+                fecha_nacimiento = datos.get("fecha_nacimiento", None)
+                if fecha_nacimiento:
+                    try:
+                        fecha_nacimiento = datetime.datetime.strptime(fecha_nacimiento, "%d-%m-%Y").strftime("%Y-%m-%d")
+                        datos["fecha_nacimiento"] = fecha_nacimiento
+                    except ValueError:
+                        formulario.add_error("fecha_nacimiento", "Formato de fecha inválido")  
+                                   
+                headers =  {
+                            "Content-Type": "application/json" 
+                        }
+                response = requests.post(
+                    env('direccionservidorlocal') + "/api/" + env('VERSION_API') + "/registrar/usuario",
+                    headers=headers,
+                    data=json.dumps(datos)
+                )
+                
+                if(response.status_code == requests.codes.ok):
+                    usuario = response.json()
+                    token_acceso = helper.obtener_token_session(
+                            formulario.cleaned_data.get("username"),
+                            formulario.cleaned_data.get("password1")
+                            )
+                    request.session["usuario"] = usuario
+                    request.session["token"] = token_acceso
+                    return redirect("urls_index")
+                else:
+                    print(response.status_code)
+                    response.raise_for_status()
+        except HTTPError as http_err:
+            print(f'Hubo un error en la petición: {http_err}')
+            if(response.status_code == 400):
+                errores = response.json()
+                for error in errores:
+                    formulario.add_error(error,errores[error])
+                return render(request, 
+                            'registration/signup.html',
+                            {"formulario":formulario})
+            else:
+                return mi_error_500(request)
+        except Exception as err:
+            print(f'Ocurrió un error: {err}')
+            return mi_error_500(request)
+            
+    else:
+        formulario = RegistroForm()
+    return render(request, 'registration/signup.html', {'formulario': formulario})
+
+def api_login(request):
+    if (request.method == "POST"):
+        formulario = LoginForm(request.POST)
+        try:
+            token_acceso = helper.obtener_token_session(
+                                formulario.data.get("usuario"),
+                                formulario.data.get("password")
+                                )
+            request.session["token"] = token_acceso
+            
+          
+            headers = {'Authorization': 'Bearer '+token_acceso} 
+            response = requests.get( env('direccionservidorlocal') +'/api/v1/usuario/token/'+token_acceso,headers=headers)
+            usuario = response.json()
+            print(usuario)
+            request.session["usuario"] = usuario
+            
+            return redirect("urls_index")
+        except Exception as excepcion:
+            print(f'Hubo un error en la petición: {excepcion}')
+            formulario.add_error("usuario",excepcion)
+            formulario.add_error("password",excepcion)
+            return render(request, 
+                            'registration/login.html',
+                            {"form":formulario})
+    else:  
+        formulario = LoginForm()
+    return render(request, 'registration/login.html', {'form': formulario})
+
+def api_logout(request):
+    del request.session['token']
+    return redirect('urls_index')

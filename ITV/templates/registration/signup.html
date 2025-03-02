@@ -7,7 +7,7 @@
 
 {% block contenido %}
 {% load django_bootstrap5 %}
-<form action = "{% url 'registrar_usuario' %}" method = "post"> 
+<form action = "{% url 'api_registrar_usuario' %}" method = "post"> 
     {% load django_bootstrap5 %} 
     {% csrf_token %} 
     {% bootstrap_form formulario %}       

@@ -4,6 +4,7 @@ from datetime import *
 from django.utils import timezone
 from .helper import helper
 import datetime
+from django.contrib.auth.forms import UserCreationForm
 
 #-----------------------------------------------------------
     
@@ -14,13 +15,7 @@ class BusquedaAvanzadaInspeccion(forms.Form):
     fecha_inspeccion=forms.DateField(required=False,label="Fecha de la inspeccion",
                                      widget=forms.DateInput(format="%Y-%m-%d", 
                                                             attrs={"type": "date"},))
-    
-class BusquedaAvanzadaVehiculo(forms.Form):
-    
-    marca=forms.CharField(required=False,label="Marca")
-    potencia=forms.IntegerField(required=False,label="Potencia")
-    matricula=forms.CharField(required=False,label="Matricula")
-    
+       
 #-----------------------------------------------------------
 
 class BusquedaAvanzadaCita(forms.Form):
@@ -254,6 +249,12 @@ class TrabajadorActualizarPuestoForm(forms.Form):
 
 #-----------------------------------------------------------
 
+class BusquedaAvanzadaVehiculo(forms.Form):
+    
+    marca=forms.CharField(required=False,label="Marca")
+    potencia=forms.IntegerField(required=False,label="Potencia")
+    matricula=forms.CharField(required=False,label="Matricula")
+ 
 class CrearVehiculo(forms.Form):
     marca = forms.CharField(
         required=True,
@@ -357,3 +358,33 @@ class VehiculoActualizarMatriculaForm(forms.Form):
         label="Nueva Matrícula",
         max_length=7
     )
+    
+#-----------------------------------------------------------
+
+class RegistroForm(UserCreationForm):
+    roles = (
+        (0,"Seleccione un tipo de rol"),
+        (2,"cliente"),
+        (3,"trabajador")        
+    )
+    
+    rol= forms.ChoiceField(choices=roles)
+    
+    fecha_nacimiento = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date', 'format': '%Y-%m-%d'})  
+    )
+    
+    apellidos=forms.CharField(required=False)
+    dni=forms.CharField(required=False)
+       
+    tipo=(('',''),('EM','Emisiones'),('FR','Frenos'),('DI','Direccion'))
+    puesto=forms.ChoiceField(choices=tipo,required=False)    
+    
+    class Meta:
+        model = Usuario
+        fields = ('username','email','password1','password2','rol')
+        
+class LoginForm(forms.Form):
+    usuario = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput())

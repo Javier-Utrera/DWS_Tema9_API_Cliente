@@ -5,17 +5,9 @@ from .import views
 
 urlpatterns = [
     path('', views.index,name="urls_index"),
-    #Listar
     path('clientes/listar_clientes', views.api_listar_clientes,name="api_listar_clientes"),
-
-
-
     path('inspecciones/listar_inspecciones', views.api_listar_inspecciones,name="api_listar_inspecciones"), 
-    
-#-----------------------------------------------------------
-
     path('inspecciones/buscar',views.api_buscar_inspeccion,name="api_buscar_inspeccion"),
-
 
 #-----------------------------------------------------------    
 
@@ -54,6 +46,7 @@ urlpatterns = [
     path('vehiculos/eliminar/<int:vehiculo_id>', views.api_eliminar_vehiculo, name="api_eliminar_vehiculo"),
     
 #-------------------------------------------------------------
+
     #ViewSet
     path('locales_viewset/listar_locales', views.api_listar_locales_viewset, name="api_listar_locales_viewset"),
     path('locales_viewset/buscar', views.api_buscar_local_viewset, name="api_buscar_local_viewset"),
@@ -61,4 +54,11 @@ urlpatterns = [
     path('locales_viewset/editar/<int:local_id>', views.api_editar_local_viewset, name="api_editar_local_viewset"),
     path('locales_viewset/actualizar/duenio/<int:local_id>', views.api_actualizar_local_duenio_viewset, name="api_actualizar_local_duenio_viewset"),
     path('locales_viewset/eliminar/<int:local_id>', views.api_eliminar_local_viewset, name="api_eliminar_local_viewset"),
+    
+#-------------------------------------------------------------
+
+    path('registrar',views.api_registrar_usuario,name='api_registrar_usuario'),
+    path('login',views.api_login,name='api_login'),
+    path('logout',views.api_logout,name='api_logout'),
+    
 ]

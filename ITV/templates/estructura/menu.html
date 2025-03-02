@@ -12,7 +12,25 @@
   </button>
   
   <div class="collapse navbar-collapse" id="accionesBiblioteca">
+
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      {% if request.session.token %}
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" 
+            id="accionesLocalesLink" 
+            role="button" 
+            data-bs-toggle="dropdown" 
+            aria-expanded="false">
+          Locales
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="accionesLocalesLink">
+          <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_locales' %}">Listar locales</a></li>
+          <li><a class="dropdown-item" aria-current="page" href="{% url 'api_buscar_local' %}">Buscar local</a></li>
+          <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_local' %}">Crear local</a></li>
+          <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_locales_viewset' %}">Listar local Vw</a></li>
+        </ul>
+      </li>
+      {% endif %}
 
       <li class="nav-item">
         <a class="nav-link active" aria-current="page" href="{% url 'api_listar_locales' %}">Listar locales</a>
@@ -37,11 +55,37 @@
         <a class="nav-link active" aria-current="page" href="{% url 'api_crear_trabajador' %}">Crear trabajador</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_crear_vehiculo' %}">Crear Vehiculo</a>
       </li>
+
       <li class="nav-item">
         <h4>ViewSet</h4>
         <a class="nav-link active" aria-current="page" href="{% url 'api_listar_locales_viewset' %}">Listar local Vw</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_local_viewset' %}">Buscar local Vw</a>
         <a class="nav-link active" aria-current="page" href="{% url 'api_crear_local_viewset' %}">Crear local Vw</a>
       </li>
+
+    </ul>
+
+    <div class="ml-2">
+
+      {% if not request.session.token %}
+        <a class="btn btn-outline-warning" href="{% url 'api_login' %}">Login</a> 
+      {% endif %}
+
+      {% if not request.session.token %}
+        <a class="btn btn-outline-warning" href="{% url 'api_registrar_usuario' %}">
+          {% csrf_token %} 
+          Registrarse
+        </a>
+      {% endif %}
+
+      {% if request.session.token %}
+        <form action="{% url 'api_logout' %}" method="post">
+          {% csrf_token %} 
+          <button class="btn btn-outline-warning" type="submit">Logout</button>
+        </form>
+      {% endif %}
+
+    </div> 
+
   </div>
 </nav>

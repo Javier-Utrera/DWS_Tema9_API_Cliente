@@ -3,13 +3,15 @@ import requests
 import environ
 import os
 from pathlib import Path
+from django.contrib import messages
+from django.shortcuts import redirect
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'),True)
 env = environ.Env()
 
 class helper:
-    # Métodos de obtención que ya tenías (sin refactorizar la lógica de errores)
+
     def obtener_clientes_select():
         headers = {'Authorization': 'Bearer ' + env("Admin")}
         url = env('direccionservidorlocal') + "/api/" + env('VERSION_API') + "/clientes/listar_clientes"
@@ -64,6 +66,24 @@ class helper:
         response = requests.get(url, headers=headers)
         return response.json()
 
+    def obtener_token_session(usuario,password):
+        token_url = env('direccionservidorlocal')+'/oauth2/token/'
+        data = {
+            'grant_type': 'password',
+            'username': usuario,
+            'password': password,
+            'client_id': 'mi_aplicacion',
+            'client_secret': 'mi_clave_secreta',
+        }
+
+        response = requests.post(token_url, data=data)
+        respuesta = response.json()
+        if response.status_code == 200:
+            return respuesta.get('access_token')
+        else:
+            raise Exception(respuesta.get("error_description"))
+        
+
     # ejecuto la peticion y controlo los errores 
     @staticmethod
     def perform_request(method, url, headers=None, params=None, data=None):
@@ -112,28 +132,29 @@ class helper:
     #  crear las cabeceras segun el usuario 
     @staticmethod
     def _crear_cabecera_por_usuario(request):
-        if request.user.is_authenticated:
-            if request.user.rol == 1:
-                return {'Authorization': 'Bearer ' + env('Admin'), 'Content-Type': 'application/json'}
-            elif request.user.rol == 2:
-                return {'Authorization': 'Bearer ' + env('Cliente'), 'Content-Type': 'application/json'}
-            else:
-                return {'Authorization': 'Bearer ' + env('Trabajador'), 'Content-Type': 'application/json'}
-        else:
-            return {'Authorization': 'Bearer ' + env('Admin'), 'Content-Type': 'application/json'}
+        
+        token = request.session.get("token")
+
+        if not token:
+            raise Exception("No se encontró un token en la sesión. El usuario debe autenticarse.")
+
+        return {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        }
 
     # peticion, manejo de errores y respuesta.
     @staticmethod
     def api_request(request, method, endpoint, params=None, data=None, extra_headers=None):
-        headers = extra_headers if extra_headers is not None else helper._crear_cabecera_por_usuario(request)
+        headers = helper._crear_cabecera_por_usuario(request)
         url = helper._build_url(endpoint)
         result = helper.perform_request(method, url, headers=headers, params=params, data=data)
         
         if result['success']:
             try:
-                return result['response'].json()  # Se retorna el JSON si es posible.
+                return result['response'].json()
             except Exception:
-                return result['response'].text  # O el texto, en su defecto.
+                return result['response'].text
         else:
             status = result.get('status')
             if status == 400:
@@ -145,7 +166,8 @@ class helper:
                         errors = {}
                 return render(request, "errores/400.html", {"errores": errors}, status=400)
             elif status == 403:
-                return render(request, "errores/403.html", status=403)
+                messages.error(request, "No tienes permisos para acceder a esta sección.")
+                return redirect("urls_index")
             elif status == 404:
                 return render(request, "errores/404.html", status=404)
             else:
