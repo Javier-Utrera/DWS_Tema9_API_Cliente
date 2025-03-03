@@ -504,3 +504,186 @@ def api_buscar_cita(request):
         formulario = BusquedaAvanzadaCita(None)
 
     return render(request, 'citas/busqueda_avanzada.html', {"formulario": formulario})
+
+  
+# DWS_Tema3_AplicacionWeb
+
+## Explicación de mi aplicación web
+
+Esta aplicación está enfocada en la gestión del servicio ITV a nivel autonómico. Un cliente, que no necesariamente tiene que ser el dueño del vehículo a inspeccionar, puede pedir una cita en la ITV que desee. Su vehículo será inspeccionado por trabajadores que generarán un resultado de la inspección y su correspondiente factura para el pago.
+
+---
+
+## Despliegue de la Aplicación
+
+Para desplegar la aplicación y comenzar a utilizarla, sigue estos pasos:
+
+### 1. Clonar el Repositorio  
+Primero, clona el repositorio en tu máquina local:
+
+```bash
+git clone https://github.com/Javier-Utrera/DWS_Tema9_API_Cliente.git
+cd DWS_Tema9_API_Cliente
+```
+
+### 2. Crear un Entorno Virtual  
+Es necesario crear un entorno virtual para gestionar las dependencias. Si aún no tienes instalado `python3-venv`, instálalo con el siguiente comando:
+
+```bash
+sudo apt-get install python3-venv
+```
+
+Una vez que tengas el entorno adecuado, crea el entorno virtual con:
+
+```bash
+python3 -m venv myvenv
+```
+
+### 3. Activar el Entorno Virtual  
+Activa el entorno virtual con el siguiente comando:
+
+```bash
+source myvenv/bin/activate
+```
+
+### 4. Actualizar `pip`  
+Asegúrate de que `pip` está actualizado en el entorno virtual:
+
+```bash
+python -m pip install --upgrade pip
+```
+
+### 5. Instalar las Dependencias  
+Instala todas las dependencias necesarias para la aplicación utilizando el archivo `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 6. Crear la Base de Datos  
+Realiza las migraciones necesarias para configurar la base de datos:
+
+```bash
+python manage.py migrate
+```
+
+### 7. Iniciar la Aplicación  
+Finalmente, puedes iniciar el servidor de desarrollo con el siguiente comando:
+
+```bash
+python manage.py runserver 0.0.0.0:8080
+```
+
+Ahora tu aplicación estará corriendo en `http://localhost:8080`.
+
+---
+
+## Autenticación y Generación de Token
+
+Para interactuar con la API, primero es necesario autenticarse y obtener un token.
+
+### **1. Registro de Usuario (POST)**
+**Endpoint:** `/registrar`
+
+**Método en `views.py`:**
+```python
+def api_registrar_usuario(request):
+    if request.method == "POST":
+        formulario = RegistroForm(request.POST)
+        if formulario.is_valid():
+            datos = request.POST.copy()
+            response = requests.post(
+                env('direccionservidorlocal') + "/api/" + env('VERSION_API') + "/registrar/usuario",
+                headers={"Content-Type": "application/json"},
+                data=json.dumps(datos)
+            )
+            if response.status_code == requests.codes.ok:
+                return redirect("urls_index")
+    return render(request, 'registration/signup.html', {'formulario': formulario})
+```
+**Comando cURL:**
+```bash
+curl -X POST https://frroga.pythonanywhere.com/registrar \
+     -H "Content-Type: application/json" \
+     -d '{"username": "usuario1", "password": "password123"}'
+```
+
+### **2. Iniciar Sesión y Obtener Token (POST)**
+**Endpoint:** `/login`
+
+**Método en `views.py`:**
+```python
+def api_login(request):
+    if request.method == "POST":
+        formulario = LoginForm(request.POST)
+        token_acceso = helper.obtener_token_session(
+            formulario.data.get("usuario"),
+            formulario.data.get("password")
+        )
+        request.session["token"] = token_acceso
+        return redirect("urls_index")
+    return render(request, 'registration/login.html', {'form': formulario})
+```
+**Comando cURL:**
+```bash
+curl -X POST https://frroga.pythonanywhere.com/login \
+     -H "Content-Type: application/json" \
+     -d '{"username": "usuario1", "password": "password123"}'
+```
+
+---
+
+## Ejemplo de Uso de la API desde el Cliente
+
+A continuación, se presentan ejemplos de cómo interactuar con el modelo `Local` mediante los métodos HTTP más comunes desde el cliente.
+
+### **1. Obtener la Lista de Locales (GET)**
+**Endpoint:** `/locales/listar_locales`
+```bash
+curl -X GET https://frroga.pythonanywhere.com/locales/listar_locales
+```
+
+### **2. Buscar un Local por Parámetro (GET con filtros)**
+**Endpoint:** `/locales/buscar`
+```bash
+curl -X GET "https://frroga.pythonanywhere.com/locales/buscar?nombre=MiLocal"
+```
+
+### **3. Crear un Nuevo Local (POST)**
+**Endpoint:** `/locales/crear`
+```bash
+curl -X POST https://frroga.pythonanywhere.com/locales/crear \
+     -H "Authorization: Bearer <TOKEN>" \
+     -H "Content-Type: application/json" \
+     -d '{"precio": 500.0, "metros": 120, "anio_arrendamiento": "2023-01-01"}'
+```
+
+### **4. Editar un Local Existente (PUT)**
+**Endpoint:** `/locales/editar/<int:local_id>`
+```bash
+curl -X PUT https://frroga.pythonanywhere.com/locales/editar/1 \
+     -H "Authorization: Bearer <TOKEN>" \
+     -H "Content-Type: application/json" \
+     -d '{"precio": 600.0, "metros": 130, "anio_arrendamiento": "2024-01-01"}'
+```
+
+### **5. Actualizar Solo el Dueño de un Local (PATCH)**
+**Endpoint:** `/locales/actualizar/duenio/<int:local_id>`
+```bash
+curl -X PATCH https://frroga.pythonanywhere.com/locales/actualizar/duenio/1 \
+     -H "Authorization: Bearer <TOKEN>" \
+     -H "Content-Type: application/json" \
+     -d '{"duenio": "Nuevo Dueño"}'
+```
+
+### **6. Eliminar un Local (DELETE)**
+**Endpoint:** `/locales/eliminar/<int:local_id>`
+```bash
+curl -X DELETE https://frroga.pythonanywhere.com/locales/eliminar/1 \
+     -H "Authorization: Bearer <TOKEN>"
+```
+
+---
+
+
+

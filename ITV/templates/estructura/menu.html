@@ -10,82 +10,153 @@
     aria-controls="navbarAccionesBiblioteca" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  
-  <div class="collapse navbar-collapse" id="accionesBiblioteca">
 
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-      {% if request.session.token %}
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" 
-            id="accionesLocalesLink" 
-            role="button" 
-            data-bs-toggle="dropdown" 
-            aria-expanded="false">
-          Locales
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="accionesLocalesLink">
-          <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_locales' %}">Listar locales</a></li>
-          <li><a class="dropdown-item" aria-current="page" href="{% url 'api_buscar_local' %}">Buscar local</a></li>
-          <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_local' %}">Crear local</a></li>
-          <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_locales_viewset' %}">Listar local Vw</a></li>
-        </ul>
-      </li>
-      {% endif %}
+  {% if request.session.token %}
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="accionesLocalesLink" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Locales
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="accionesLocalesLink">
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_locales' %}">Listar locales</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_buscar_local' %}">Buscar local</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_local' %}">Crear local</a></li>
+      </ul>
+    </li>
+  </ul>
 
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_locales' %}">Listar locales</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_citas' %}">Listar citas</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_trabajadores' %}">Listar trabajadores</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_vehiculos' %}">Listar vehiculos</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_inspecciones' %}">Listar inspecciones</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_clientes' %}">Listar clientes</a>
-      </li>
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="accionesCitasLink" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Citas
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="accionesCitasLink">
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_citas' %}">Listar citas</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_buscar_cita' %}">Buscar cita</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_cita' %}">Crear cita</a></li>
+      </ul>
+    </li>
+  </ul>
 
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_local' %}">Buscar local</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_cita' %}">Buscar cita</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_trabajador' %}">Buscar trabajador</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_vehiculo' %}">Buscar vehiculo</a>        
-        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_inspeccion' %}">Buscar inspeccion</a>
-      </li>
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="accionesTrabajadoresLink" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Trabajadores
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="accionesTrabajadoresLink">
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_trabajadores' %}">Listar
+            trabajadores</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_buscar_trabajador' %}">Buscar
+            trabajador</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_trabajador' %}">Crear
+            trabajador</a></li>
+      </ul>
+    </li>
+  </ul>
 
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_local' %}">Crear local</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_cita' %}">Crear cita</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_trabajador' %}">Crear trabajador</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_vehiculo' %}">Crear Vehiculo</a>
-      </li>
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="accionesVehiculosLink" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Vehiculos
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="accionesVehiculosLink">
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_vehiculos' %}">Listar
+            vehiculos</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_buscar_vehiculo' %}">Buscar
+            vehiculo</a> </li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_vehiculo' %}">Crear
+            Vehiculo</a></li>
+      </ul>
+    </li>
+  </ul>
 
-      <li class="nav-item">
-        <h4>ViewSet</h4>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_listar_locales_viewset' %}">Listar local Vw</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_buscar_local_viewset' %}">Buscar local Vw</a>
-        <a class="nav-link active" aria-current="page" href="{% url 'api_crear_local_viewset' %}">Crear local Vw</a>
-      </li>
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="accionesOtrosLink" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Otros
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="accionesOtrosLink">
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_inspecciones' %}">Listar
+            inspecciones</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_clientes' %}">Listar
+            clientes</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_buscar_inspeccion' %}">Buscar
+            inspeccion</a></li>
+      </ul>
+    </li>
+  </ul>
 
-    </ul>
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="accionesViewLink" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Viewset
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="accionesViewLink">
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_locales_viewset' %}">Listar local
+            Vw</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_buscar_local_viewset' %}">Buscar local
+            Vw</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_local_viewset' %}">Crear
+            local Vw</a></li>
+      </ul>
+    </li>
+  </ul>
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="accionesGETLink" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        GET con Token
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="accionesGETLink">
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_vehiculos_cliente' %}">Listar Vehiculos Cliente</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_listar_citas_cliente' %}">Listar Citas Cliente</a></li>
+      </ul>
+    </li>
+  </ul>
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="accionesGETLink" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        POST con Token
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="accionesGETLink">
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_vehiculo_autenticado' %}">Crear Vehiculo Cliente</a></li>
+        <li><a class="dropdown-item" aria-current="page" href="{% url 'api_crear_cita_autenticado' %}">Crear Cita Cliente</a></li>
+      </ul>
+    </li>
+  </ul>
+  {% else %}
+  <div class="mx-auto text-white text-center">
+    <span class="fw-bold">Debes iniciar sesión</span>
+  </div>
+  {% endif %}
+  <div class="ml-2">
 
-    <div class="ml-2">
+    {% if not request.session.token %}
+    <a class="btn btn-outline-warning" href="{% url 'api_login' %}">Login</a>
+    {% endif %}
 
-      {% if not request.session.token %}
-        <a class="btn btn-outline-warning" href="{% url 'api_login' %}">Login</a> 
-      {% endif %}
+    {% if not request.session.token %}
+    <a class="btn btn-outline-warning" href="{% url 'api_registrar_usuario' %}">
+      {% csrf_token %}
+      Registrarse
+    </a>
+    {% endif %}
 
-      {% if not request.session.token %}
-        <a class="btn btn-outline-warning" href="{% url 'api_registrar_usuario' %}">
-          {% csrf_token %} 
-          Registrarse
-        </a>
-      {% endif %}
-
-      {% if request.session.token %}
-        <form action="{% url 'api_logout' %}" method="post">
-          {% csrf_token %} 
-          <button class="btn btn-outline-warning" type="submit">Logout</button>
-        </form>
-      {% endif %}
-
-    </div> 
+    {% if request.session.token %}
+    <form action="{% url 'api_logout' %}" method="post">
+      {% csrf_token %}
+      <button class="btn btn-outline-warning" type="submit">Logout</button>
+    </form>
+    {% endif %}
 
   </div>
+
+
 </nav>

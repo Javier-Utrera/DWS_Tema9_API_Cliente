@@ -1,7 +1,11 @@
 from django.contrib.auth import views as auth_views
+from django.shortcuts import render
 from django.urls import path
 from django.contrib import admin
 from .import views
+
+def test_cors_view(request):
+    return render(request, "test_cors.html")
 
 urlpatterns = [
     path('', views.index,name="urls_index"),
@@ -61,4 +65,17 @@ urlpatterns = [
     path('login',views.api_login,name='api_login'),
     path('logout',views.api_logout,name='api_logout'),
     
+#-------------------------------------------------------------
+
+    path('vehiculos/listar_vehiculos_cliente', views.api_listar_vehiculos_cliente,name="api_listar_vehiculos_cliente"),
+    path('citas/listar_citas_cliente', views.api_listar_citas_cliente,name="api_listar_citas_cliente"),
+    
+#-------------------------------------------------------------
+   
+    path('citas/crear_cliente', views.api_crear_cita_autenticado, name="api_crear_cita_autenticado"),
+    path('vehiculos/crear_cliente', views.api_crear_vehiculo_autenticado, name="api_crear_vehiculo_autenticado"),
+    
+#-------------------------------------------------------------
+
+    path("test-cors/", test_cors_view, name="test_cors"),
 ]

@@ -388,3 +388,42 @@ class RegistroForm(UserCreationForm):
 class LoginForm(forms.Form):
     usuario = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput())
+    
+#-----------------------------------------------------------
+
+class CrearCitaCliente(forms.Form):
+    TIPOINSPECCION = [
+        ('PE', 'Periodica'),
+        ('NOPE', 'No Periodica'),
+        ('VETAX', 'Verificacion Taximetro'),
+        ('VETAXV', 'Verificacion Taximetro Cambio Vehiculo')
+    ]
+
+    matricula = forms.CharField(label="Matrícula", max_length=10)
+    fecha_matriculacion = forms.DateField(label="Fecha Matriculación", widget=forms.SelectDateWidget(years=range(1970, 2026)))
+    numero_bastidor = forms.CharField(label="Número de Bastidor", max_length=17, required=False)
+    tipo_inspeccion = forms.ChoiceField(label="Tipo de Inspección", choices=TIPOINSPECCION)
+    remolque = forms.BooleanField(label="¿Tiene remolque?", required=False)
+    tipo_pago = forms.ChoiceField(label="Tipo de Pago", choices=[("EF", "Efectivo"), ("TA", "Tarjeta")])
+    fecha_propuesta = forms.DateField(label="Fecha Propuesta", widget=forms.SelectDateWidget(years=range(2025, 2028)))
+    hora_propuesta = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}), label="Hora Propuesta")
+    estacion = forms.ChoiceField(label="Estación ITV", choices=[])
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        estacionesDisponibles = helper.obtener_estaciones_select()
+        self.fields["estacion"].choices = estacionesDisponibles
+        
+class CrearVehiculoCliente(forms.Form):
+    marca = forms.CharField(label="Marca", max_length=50)
+    modelo = forms.CharField(label="Modelo", max_length=50)
+    numero_bastidor = forms.CharField(label="Número de Bastidor", max_length=17)
+    tipo_vehiculo = forms.ChoiceField(label="Tipo de Vehículo", choices=[('tur', 'Turismo'), ('moto', 'Motocicleta')])
+    cilindrada = forms.IntegerField(label="Cilindrada")
+    potencia = forms.IntegerField(label="Potencia")
+    combustible = forms.ChoiceField(label="Combustible", choices=[('gas', 'Gasolina'), ('die', 'Diésel')])
+    mma = forms.IntegerField(label="Masa Máxima Autorizada")
+    asientos = forms.IntegerField(label="Número de Asientos")
+    ejes = forms.IntegerField(label="Número de Ejes")
+    matricula = forms.CharField(label="Matrícula", max_length=7)
+    fecha_matriculacion = forms.DateField(label="Fecha de Matriculación", widget=forms.SelectDateWidget(years=range(1980, 2035)))

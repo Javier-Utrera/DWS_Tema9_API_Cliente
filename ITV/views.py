@@ -242,6 +242,8 @@ def api_crear_cita(request):
                     day=int(datos['fecha_propuesta_day'])
                 )
             )
+            if datos["hora_propuesta"]:
+                datos["hora_propuesta"] = datos["hora_propuesta"].strftime("%H:%M:%S")
             result = helper.api_request(request, "post", "citas/crear", data=json.dumps(datos))
             if hasattr(result, "status_code"):
                 return result
@@ -733,3 +735,75 @@ def api_login(request):
 def api_logout(request):
     del request.session['token']
     return redirect('urls_index')
+
+def api_listar_vehiculos_cliente(request):
+    result = helper.api_request(request, "get", "vehiculos/listar_vehiculos_cliente")
+    if hasattr(result, "status_code"):
+        return result
+    return render(request, "vehiculos/listar_vehiculos.html", {'views_vehiculos': result})
+
+def api_listar_citas_cliente(request):
+    result = helper.api_request(request, "get", "citas/listar_citas_cliente")
+    if hasattr(result, "status_code"):
+        return result
+    return render(request, "citas/listar_citas.html", {'views_citas': result})
+
+def api_crear_cita_autenticado(request):
+    if request.method == "POST":
+        formulario = CrearCitaCliente(request.POST)
+
+        if formulario.is_valid():
+            datos = formulario.cleaned_data.copy()
+
+            datos["fecha_matriculacion"] = datos["fecha_matriculacion"].strftime("%Y-%m-%d")
+            datos["fecha_propuesta"] = datos["fecha_propuesta"].strftime("%Y-%m-%d")
+            datos["hora_propuesta"] = datos["hora_propuesta"].strftime("%H:%M:%S")
+            headers = {
+                "Authorization": f"Bearer {request.session.get('token')}",
+                "Content-Type": "application/json"
+            }
+
+            result = helper.api_request(request, "post", "citas/crear_cliente", data=json.dumps(datos), extra_headers=headers)
+
+            if hasattr(result, "status_code"):
+                return result
+
+            messages.success(request, "Cita creada correctamente")
+            return redirect("api_listar_citas_cliente")
+
+        return render(request, 'citas/create.html', {"formulario": formulario})
+
+    else:
+        formulario = CrearCitaCliente()
+    return render(request, 'citas/create.html', {"formulario": formulario})
+
+def api_crear_vehiculo_autenticado(request):
+    if request.method == "POST":
+        formulario = CrearVehiculoCliente(request.POST)
+
+        if formulario.is_valid():
+            datos = formulario.cleaned_data.copy()
+
+            datos["fecha_matriculacion"] = datos["fecha_matriculacion"].strftime("%Y-%m-%d")
+
+            headers = {
+                "Authorization": f"Bearer {request.session.get('token')}",
+                "Content-Type": "application/json"
+            }
+
+            result = helper.api_request(request, "post", "vehiculos/crear_cliente", data=json.dumps(datos), extra_headers=headers)
+
+            if hasattr(result, "status_code"):
+                return result
+
+            messages.success(request, "Vehículo creado correctamente")
+            return redirect("api_listar_vehiculos_cliente")
+
+        return render(request, 'vehiculos/create.html', {"formulario": formulario})
+
+    else:
+        formulario = CrearVehiculoCliente()
+    return render(request, 'vehiculos/create.html', {"formulario": formulario})
+
+
+
