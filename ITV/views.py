@@ -8,7 +8,9 @@ import environ
 import os
 from pathlib import Path
 from django.contrib import messages
+from datetime import date
 from datetime import datetime
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -226,34 +228,45 @@ def api_buscar_cita(request):
 def api_crear_cita(request):
     if request.method == "POST":
         formulario = CrearCita(request.POST)
+        
         if formulario.is_valid():
-            datos = formulario.data.copy()
-            datos["fecha_matriculacion"] = str(
-                datetime.date(
-                    year=int(datos['fecha_matriculacion_year']),
-                    month=int(datos['fecha_matriculacion_month']),
-                    day=int(datos['fecha_matriculacion_day'])
-                )
-            )
-            datos["fecha_propuesta"] = str(
-                datetime.date(
-                    year=int(datos['fecha_propuesta_year']),
-                    month=int(datos['fecha_propuesta_month']),
-                    day=int(datos['fecha_propuesta_day'])
-                )
-            )
+            datos = formulario.cleaned_data.copy() 
+
+            datos["fecha_matriculacion"] = str(date(
+                int(request.POST["fecha_matriculacion_year"]),
+                int(request.POST["fecha_matriculacion_month"]),
+                int(request.POST["fecha_matriculacion_day"])
+            ))
+            
+            datos["fecha_propuesta"] = str(date(
+                int(request.POST["fecha_propuesta_year"]),
+                int(request.POST["fecha_propuesta_month"]),
+                int(request.POST["fecha_propuesta_day"])
+            ))
+
             if datos["hora_propuesta"]:
                 datos["hora_propuesta"] = datos["hora_propuesta"].strftime("%H:%M:%S")
+
             result = helper.api_request(request, "post", "citas/crear", data=json.dumps(datos))
-            if hasattr(result, "status_code"):
-                return result
-            messages.success(request, result)
+
+            if hasattr(result, "status_code") and result.status_code == 400:
+                errores_servidor = result.json().get("detalles", {})
+                
+                for campo, errores in errores_servidor.items():
+                    formulario.add_error(campo, errores[0]) 
+                
+                return render(request, "citas/create.html", {"formulario": formulario}) 
+
+            messages.success(request, "Cita creada correctamente")
             return redirect("api_listar_citas")
+        
         else:
-            return render(request, 'citas/create.html', {"formulario": formulario})
+            return render(request, "citas/create.html", {"formulario": formulario})
+
     else:
         formulario = CrearCita(None)
-    return render(request, 'citas/create.html', {"formulario": formulario})
+
+    return render(request, "citas/create.html", {"formulario": formulario})
 
 def api_editar_cita(request, cita_id):
     cita_data = helper.obtener_cita(cita_id)
@@ -262,27 +275,27 @@ def api_editar_cita(request, cita_id):
         "cliente": cita_data["cliente"]["id"],
         "estacion": cita_data["estacion"]["id"],
         "matricula": cita_data["matricula"],
-        "fecha_matriculacion": datetime.datetime.strptime(cita_data["fecha_matriculacion"], "%Y-%m-%d").date(),
+        "fecha_matriculacion": datetime.strptime(cita_data["fecha_matriculacion"], "%Y-%m-%d").date(),
         "numero_bastidor": cita_data["numero_bastidor"],
         "tipo_inspeccion": cita_data["tipo_inspeccion"],
         "remolque": cita_data["remolque"],
         "tipo_pago": cita_data["tipo_pago"],
-        "fecha_propuesta": datetime.datetime.strptime(cita_data["fecha_propuesta"], "%Y-%m-%d").date(),
+        "fecha_propuesta": datetime.strptime(cita_data["fecha_propuesta"], "%Y-%m-%d").date(),
         "hora_propuesta": cita_data["hora_propuesta"]
     })
     if request.method == "POST":
         formulario = CrearCita(request.POST)
         if formulario.is_valid():
             datos = formulario.cleaned_data.copy()
-            datos["fecha_matriculacion"] = str(datetime.date(
-                year=int(request.POST["fecha_matriculacion_year"]),
-                month=int(request.POST["fecha_matriculacion_month"]),
-                day=int(request.POST["fecha_matriculacion_day"])
+            datos["fecha_matriculacion"] = str(date(
+                int(request.POST["fecha_matriculacion_year"]),
+                int(request.POST["fecha_matriculacion_month"]),
+                int(request.POST["fecha_matriculacion_day"])
             ))
-            datos["fecha_propuesta"] = str(datetime.date(
-                year=int(request.POST["fecha_propuesta_year"]),
-                month=int(request.POST["fecha_propuesta_month"]),
-                day=int(request.POST["fecha_propuesta_day"])
+            datos["fecha_propuesta"] = str(date(
+                int(request.POST["fecha_propuesta_year"]),
+                int(request.POST["fecha_propuesta_month"]),
+                int(request.POST["fecha_propuesta_day"])
             ))
             datos["hora_propuesta"] = str(formulario.cleaned_data["hora_propuesta"])
             result = helper.api_request(request, "put", f"citas/editar/{cita_id}", data=json.dumps(datos))
@@ -447,23 +460,28 @@ def api_crear_vehiculo(request):
         formulario = CrearVehiculo(request.POST)
         if formulario.is_valid():
             datos = request.POST.copy()
-            datos["trabajadores"] = json.loads(request.POST["trabajadores"])
-            datos["fecha_matriculacion"] = str(
-                datetime.date(
-                    year=int(datos['fecha_matriculacion_year']),
-                    month=int(datos['fecha_matriculacion_month']),
-                    day=int(datos['fecha_matriculacion_day'])
-                )
-            )
+            trabajadores_ids = request.POST.getlist("trabajadores")
+            datos["trabajadores"] = [{"id": int(trabajador)} for trabajador in trabajadores_ids]
+
+            datos["fecha_matriculacion"] = str(date(
+                int(datos['fecha_matriculacion_year']),
+                int(datos['fecha_matriculacion_month']),
+                int(datos['fecha_matriculacion_day'])
+            ))
+
+            print("📌 Datos enviados al servidor:", json.dumps(datos, indent=4))
+
             result = helper.api_request(request, "post", "vehiculos/crear", data=json.dumps(datos))
             if hasattr(result, "status_code"):
                 return result
+
             messages.success(request, "Vehículo creado correctamente")
             return redirect("api_listar_vehiculos")
+
         else:
             return render(request, "vehiculos/create.html", {"formulario": formulario})
-    else:
-        formulario = CrearVehiculo()
+
+    formulario = CrearVehiculo()
     return render(request, "vehiculos/create.html", {"formulario": formulario})
 
 def api_editar_vehiculo(request, vehiculo_id):
@@ -489,14 +507,13 @@ def api_editar_vehiculo(request, vehiculo_id):
         formulario = CrearVehiculo(request.POST)
         if formulario.is_valid():
             datos = request.POST.copy()
-            datos["trabajadores"] = list(map(int, request.POST.getlist("trabajadores")))
-            datos["fecha_matriculacion"] = str(
-                datetime.date(
-                    year=int(request.POST["fecha_matriculacion_year"]),
-                    month=int(request.POST["fecha_matriculacion_month"]),
-                    day=int(request.POST["fecha_matriculacion_day"])
-                )
-            )
+            trabajadores_ids = request.POST.getlist("trabajadores")
+            datos["trabajadores"] = [{"id": int(trabajador)} for trabajador in trabajadores_ids]
+            datos["fecha_matriculacion"] = str(date(
+                int(request.POST["fecha_matriculacion_year"]),
+                int(request.POST["fecha_matriculacion_month"]),
+                int(request.POST["fecha_matriculacion_day"])
+            ))
             result = helper.api_request(request, "put", f"vehiculos/editar/{vehiculo_id}", data=json.dumps(datos))
             if hasattr(result, "status_code"):
                 return result
@@ -658,7 +675,7 @@ def api_registrar_usuario(request):
                 fecha_nacimiento = datos.get("fecha_nacimiento", None)
                 if fecha_nacimiento:
                     try:
-                        fecha_nacimiento = datetime.datetime.strptime(fecha_nacimiento, "%d-%m-%Y").strftime("%Y-%m-%d")
+                        fecha_nacimiento = datetime.strptime(fecha_nacimiento, "%d-%m-%Y").strftime("%Y-%m-%d")
                         datos["fecha_nacimiento"] = fecha_nacimiento
                     except ValueError:
                         formulario.add_error("fecha_nacimiento", "Formato de fecha inválido")  

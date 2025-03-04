@@ -7,6 +7,8 @@
 {% block contenido %}
 
 {% load django_bootstrap5 %}
+{% if formulario.errors %}
+{% endif %}
 <form action = "{% url 'api_editar_cita' cita.id %}" method = "post" enctype="multipart/form-data"> 
     {% load django_bootstrap5 %} 
     {% csrf_token %} 
